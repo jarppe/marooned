@@ -1,0 +1,133 @@
+:root {
+  --text-color:       rgb(60, 60, 60);
+  --background-color: hsl(0 0% 10%);
+  --hover-color:      rgb(100, 100, 100);
+  --active-color:     rgb(23, 87, 23);
+}
+
+
+html, body, div, main, svg, h1, a, i {
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+
+a, a:hover, a:visited, a:active {
+  background-color: transparent;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+a {
+  display: flex;
+  fill: var(--text-color);
+  
+  &:hover  { fill: var(--hover-color); }
+  &.active { fill: var(--active-color); }  
+
+  & svg {
+    width: 2rem;
+    height: 2rem;
+    padding: 1rem;
+  }
+
+  &.large svg {
+    width: 4rem;
+    height: 4rem;
+    padding: 2rem;
+  }
+}
+
+
+/* In fullscreen the #wrapper is the "fullscreen" element. Thus its important
+   that both body and @wrapper have background color set. */
+
+body {
+  font-family: system-ui;
+  background-color: var(--background-color);
+}
+
+
+#wrapper {
+  width: 100dvw;
+  height: 100dvh;
+  background-color: var(--background-color);
+  position: relative;
+}
+
+
+#game {
+  position: absolute;
+  inset: 0;
+}
+
+
+h1 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding-top: 0.2em;
+  font-size: 1.5rem;
+  text-align: center;
+  color: var(--text-color);
+}
+
+
+#fullscreen { 
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+
+#sound { 
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+
+#left {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-flow: row nowrap;
+  padding-left: 2rem;
+}
+
+
+#right {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  display: flex;
+  flex-flow: row nowrap;
+  padding-right: 2rem;
+}
+
+
+#debug {
+  position: absolute;
+  top: 4rem;
+  left: 1rem;
+  z-index: 10;
+  background-color: rgba(50, 50, 50, 0.7);
+  color: green;
+  font-size: 1.7em;
+  font-family: monospace;
+}
+
+#debug table tr {
+  padding-block: 0.3em;
+}
+
+#debug table td {
+  padding-inline: 0.5em;
+}
+
+#debug table td:nth-child(2) {
+  text-align: right;
+}

@@ -1,0 +1,32 @@
+{
+  "name": "Marooned",
+  "display": "fullscreen",
+  "start_url": "./index.html",
+  "icons": [
+    {
+      "src": "icon/marooned.512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    },
+    {
+      "src": "icon/marooned.256.png",
+      "type": "image/png",
+      "sizes": "256x256"
+    },
+    {
+      "src": "icon/marooned.64.png",
+      "type": "image/png",
+      "sizes": "64x64"
+    },
+    {
+      "src": "icon/marooned.32.png",
+      "type": "image/png",
+      "sizes": "32x32"
+    },
+    {
+      "src": "icon/marooned.svg",
+      "type": "image/svg",
+      "sizes": "any"
+    }
+  ]
+}

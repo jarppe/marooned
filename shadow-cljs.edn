@@ -1,0 +1,18 @@
+{:deps   {:aliases [:dev :test]}
+ :builds {:web  {:target           :browser
+                 :output-dir       "public"
+                 :asset-path       "."
+                 :modules          {:shared {:entries []}
+                                    :app    {:entries    [marooned.app]
+                                             :depends-on #{:shared}}
+                                    :worker {:init-fn    marooned.worker/init
+                                             :depends-on #{:shared}
+                                             :web-worker true}}
+                 :compiler-options {:output-feature-set :es8}
+                 :devtools         {:after-load marooned.app/run
+                                    :http-root  "public"
+                                    :http-port  8900}}
+          :test {:target     :node-test
+                 :output-to  "target/test/index.js"
+                 :output-dir "target/test/js"
+                 :autorun    true}}}
