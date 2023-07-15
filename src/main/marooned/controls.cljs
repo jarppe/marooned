@@ -26,20 +26,68 @@
     nil))
 
 
-(defn on-mouse [control-code down?]
+(defn on-mouse-down [control-code]
   (fn [^js e]
     (.preventDefault e)
-    (swap! app-state assoc control-code down?)))
+    (swap! app-state assoc control-code true)))
+
+
+(defn on-mouse-up [control-code]
+  (fn [^js e]
+    (.preventDefault e)
+    (swap! app-state assoc control-code false)))
+
+
+(defn on-touch-start [control-code]
+  (fn [^js e]
+    (.preventDefault e)
+    (js/console.log "on-touch-start" (name control-code))
+    (swap! app-state assoc control-code true)))
+
+
+(defn on-touch-end [control-code]
+  (fn [^js e]
+    (.preventDefault e)
+    (js/console.log "on-touch-end" (name control-code))
+    (swap! app-state assoc control-code false)))
+
+
+(defn on-touch-cancel [control-code]
+  (fn [^js e]
+    (.preventDefault e)
+    (js/console.log "on-touch-cancel" (name control-code))
+    (swap! app-state assoc control-code false)))
 
 
 (defn init! []
   (u/add-event-listener js/window :keydown (on-key true))
   (u/add-event-listener js/window :keyup (on-key false))
-  (u/add-event-listener "left-thruster" :mousedown (on-mouse :left-thruster true))
-  (u/add-event-listener "left-thruster" :mouseup (on-mouse :left-thruster false))
-  (u/add-event-listener "right-thruster" :mousedown (on-mouse :right-thruster true))
-  (u/add-event-listener "right-thruster" :mouseup (on-mouse :right-thruster false))
-  (u/add-event-listener "forward-thruster" :mousedown (on-mouse :forward-thruster true))
-  (u/add-event-listener "forward-thruster" :mouseup (on-mouse :forward-thruster false))
-  (u/add-event-listener "cannon" :mousedown (on-mouse :cannon true))
-  (u/add-event-listener "cannon" :mouseup (on-mouse :cannon false)))
+
+  (-> "left-thruster"
+      (u/add-event-listener :mousedown (on-mouse-down :left-thruster))
+      (u/add-event-listener :mouseup (on-mouse-up :left-thruster))
+      (u/add-event-listener :touchstart (on-touch-start :left-thruster))
+      (u/add-event-listener :touchend (on-touch-end :left-thruster))
+      (u/add-event-listener :touchcancel (on-touch-cancel :left-thruster)))
+
+
+  (-> "right-thruster"
+      (u/add-event-listener :mousedown (on-mouse-down :right-thruster))
+      (u/add-event-listener :mouseup (on-mouse-up :right-thruster))
+      (u/add-event-listener :touchstart (on-touch-start :right-thruster))
+      (u/add-event-listener :touchend (on-touch-end :right-thruster))
+      (u/add-event-listener :touchcancel (on-touch-cancel :right-thruster)))
+
+  (-> "forward-thruster"
+      (u/add-event-listener :mousedown (on-mouse-down :forward-thruster))
+      (u/add-event-listener :mouseup (on-mouse-up :forward-thruster))
+      (u/add-event-listener :touchstart (on-touch-start :forward-thruster))
+      (u/add-event-listener :touchend (on-touch-end :forward-thruster))
+      (u/add-event-listener :touchcancel (on-touch-cancel :forward-thruster)))
+
+  (-> "cannon"
+      (u/add-event-listener :mousedown (on-mouse-down :cannon))
+      (u/add-event-listener :mouseup (on-mouse-up :cannon))
+      (u/add-event-listener :touchstart (on-touch-start :cannon))
+      (u/add-event-listener :touchend (on-touch-end :cannon))
+      (u/add-event-listener :touchcancel (on-touch-cancel :cannon))))
