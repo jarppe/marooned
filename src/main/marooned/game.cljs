@@ -64,7 +64,6 @@
         [nh nv nx ny]        (vec+ (:vh state) (:vs state) h forward-thruster)
         x                    (+ (:x state) nx)
         y                    (+ (:y state) ny)]
-    (js/console.log "vec+" (.toFixed nh 2) (.toFixed nv 2) (.toFixed nx 2) (.toFixed ny 2))
     (svg/set-attr (:speed state) :rotate (rad->deg nh) :y2 (* -100 nv))
     (svg/set-attr (:hull state) :rotate (rad->deg h))
     (svg/set-attr (:ship state) :translate [x y])
@@ -92,11 +91,17 @@
 
 
 (defn make-thruster-ctrl [thruster]
-  (fn [down?]
-    (swap! state/app-state update :sound update thruster (fn [sound-id]
-                                                           (if down?
-                                                             (audio/play-on thruster)
-                                                             (audio/play-off thruster sound-id 200))))))
+  (let [cone (keyword (str (name thruster) "-cone"))]
+    (fn [down?]
+      (swap! state/app-state (fn [state]
+                               (update state :sound update thruster (fn [sound-id]
+                                                                      (if down?
+                                                                        (do
+                                                                          (svg/set-attr (state cone) :display "")
+                                                                          (audio/play-on thruster))
+                                                                        (do
+                                                                          (svg/set-attr (state cone) :display "none")
+                                                                          (audio/play-off thruster sound-id 200))))))))))
 
 
 (defn init! []

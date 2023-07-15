@@ -120,8 +120,14 @@
 
 (defn circle
   ([cx cy r] (circle nil cx cy r))
-  ([attrs cx cy r]
-   (create-element "circle" (assoc attrs :cx cx :cy cy :r r))))
+  ([attrs cx cy r & children]
+   (create-element "circle" (assoc attrs :cx cx :cy cy :r r) children)))
+
+
+(defn ellipse
+  ([cx cy rx ry] (ellipse nil cx cy rx ry))
+  ([attrs cx cy rx ry & children]
+   (create-element "ellipse" (assoc attrs :cx cx :cy cy :rx rx :ry ry) children)))
 
 
 (defn rect
@@ -139,9 +145,10 @@
 
 
 (defn path
-  ([d] (path nil d))
-  ([attrs d]
-   (create-element "path" (assoc attrs :d d))))
+  ([d] (path nil d nil))
+  ([attrs d] (path attrs d nil))
+  ([attrs d children]
+   (create-element "path" (assoc attrs :d d) children)))
 
 
 (defn line
@@ -164,11 +171,14 @@
 
 (defn polygon
   ([points] (polygon nil points))
-  ([attrs points]
-   (create-element "polygon" (assoc attrs :points (reduce (fn [acc [x y]]
-                                                            (str acc x "," y " "))
-                                                          ""
-                                                          points)))))
+  ([attrs points & children]
+   (create-element "polygon"
+                   (assoc attrs :points (reduce (fn [acc [x y]]
+                                                  (str acc x "," y " "))
+                                                ""
+                                                points))
+                   children)))
+
 
 (def defs (partial create-element "defs"))
 
@@ -185,3 +195,5 @@
 (def linear-gradient (partial create-element "linearGradient"))
 (def radial-gradient (partial create-element "radialGradient"))
 (def stop (partial create-element "stop"))
+
+(def animate (partial create-element "animate"))
