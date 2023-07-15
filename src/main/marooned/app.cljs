@@ -10,10 +10,11 @@
 
 (defonce init-app
   (delay (println "init: registering worker...")
-         (-> (js-get js/navigator "serviceWorker")
-             (.register "worker.js" #js {:scope "./"})
-             (.then (fn [_] (println "init: worker registered")))
-             (.catch (fn [error] (println "init: worker failed" error))))
+         (when-let [^js service-worker (js-get js/navigator "serviceWorker")]
+           (-> service-worker
+               (.register "worker.js" #js {:scope "./"})
+               (.then (fn [_] (println "init: worker registered")))
+               (.catch (fn [error] (println "init: worker failed" error)))))
          (println "init: init modules")
          (sound/init!)
          (fullscreen/init!)
