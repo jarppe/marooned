@@ -99,7 +99,7 @@
 
 
 (defn create-element [tag & children]
-  (let [elem             (.createElementNS js/document xmlns tag)
+  (let [elem             (js/document.createElementNS xmlns tag)
         [attrs children] (if (map? (first children))
                            [(first children) (rest children)]
                            [nil children])]
@@ -107,6 +107,8 @@
     (g/set elem "rotate" 0.0)
     (g/set elem "scale" 1.0)
     (apply set-attr elem (mapcat identity attrs))
+    (when (#{"polygon" "path"} tag)
+      (js/console.log "create-element:" tag (pr-str children)))
     (doseq [c children]
       (if (sequential? c)
         (append* elem c)
@@ -114,70 +116,43 @@
     elem))
 
 
-(def svg (partial create-element "svg"))
+(defn svg [& args]
+  (let [[attrs children] (if (map? (first args))
+                           [(first args) (rest args)]
+                           [nil args])]
+    (create-element "svg" (merge {:version "1.1"
+                                  :xmlns   xmlns}
+                                 attrs)
+                    children)))
+
+
+
 (def g (partial create-element "g"))
 
 
-(defn circle
-  ([cx cy r] (circle nil cx cy r))
-  ([attrs cx cy r & children]
-   (create-element "circle" (assoc attrs :cx cx :cy cy :r r) children)))
+(def circle (partial create-element "circle"))
+(def ellipse (partial create-element "ellipse"))
+(def rect (partial create-element "rect"))
+(def path (partial create-element "path"))
+(def line (partial create-element "line"))
 
 
-(defn ellipse
-  ([cx cy rx ry] (ellipse nil cx cy rx ry))
-  ([attrs cx cy rx ry & children]
-   (create-element "ellipse" (assoc attrs :cx cx :cy cy :rx rx :ry ry) children)))
+(defn- convert-points [args]
+  (update args :points (fn [points]
+                         (if (vector? points)
+                           (reduce (fn [s [x y]]
+                                     (str s x "," y " "))
+                                   ""
+                                   points)
+                           points))))
 
 
-(defn rect
-  ([x y w h] (rect nil x y w h 0 0))
-  ([attrs x y w h] (rect attrs x y w h 0 0))
-  ([x y w h rx ry] (rect nil x y w h rx ry))
-  ([attrs x y w h rx ry]
-   (create-element "rect" (assoc attrs
-                                 :x x
-                                 :y y
-                                 :width w
-                                 :height h
-                                 :rx rx
-                                 :ry ry))))
+(defn polyline [args & children]
+  (apply create-element "polyline" (convert-points args) children))
 
 
-(defn path
-  ([d] (path nil d nil))
-  ([attrs d] (path attrs d nil))
-  ([attrs d children]
-   (create-element "path" (assoc attrs :d d) children)))
-
-
-(defn line
-  ([x1 y1 x2 y2] (line nil x1 y1 x2 y2))
-  ([attrs x1 y1 x2 y2]
-   (create-element "line" (assoc attrs
-                                 :x1 x1
-                                 :y1 y1
-                                 :x2 x2
-                                 :y2 y2))))
-
-(defn polyline
-  ([points] (polyline nil points))
-  ([attrs points]
-   (create-element "polyline" (assoc attrs :points (reduce (fn [acc [x y]]
-                                                             (str acc x "," y " "))
-                                                           ""
-                                                           points)))))
-
-
-(defn polygon
-  ([points] (polygon nil points))
-  ([attrs points & children]
-   (create-element "polygon"
-                   (assoc attrs :points (reduce (fn [acc [x y]]
-                                                  (str acc x "," y " "))
-                                                ""
-                                                points))
-                   children)))
+(defn polygon [args & children]
+  (apply create-element "polygon" (convert-points args) children))
 
 
 (def defs (partial create-element "defs"))

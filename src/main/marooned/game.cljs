@@ -28,7 +28,7 @@
 
 (def init-game {:ts 0
                 :x  0.0
-                :y  0.0
+                :y  500.0
                 :vh 0.0
                 :vs 0.0
                 :h  0.0
@@ -64,9 +64,10 @@
         [nh nv nx ny]        (vec+ (:vh state) (:vs state) h forward-thruster)
         x                    (+ (:x state) nx)
         y                    (+ (:y state) ny)]
+    (svg/set-attr (:scene state) :translate [(+ x 500) 0])
     (svg/set-attr (:speed state) :rotate (rad->deg nh) :y2 (* -100 nv))
     (svg/set-attr (:hull state) :rotate (rad->deg h))
-    (svg/set-attr (:ship state) :translate [x y])
+    (svg/set-attr (:ship state) :translate [0 y])
     (assoc state
            :x x
            :y y

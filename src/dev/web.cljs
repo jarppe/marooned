@@ -29,4 +29,29 @@
        x y]))
 
   (let [[h v] (vec+ 0 10 (* 0.5 js/Math.PI) 10)]
-    [(.toFixed h 2) (.toFixed v 2)]))
+    [(.toFixed h 2) (.toFixed v 2)])
+
+
+
+  (defn create-element [tag & children]
+    (let [[attrs children] (if (map? (first children))
+                             [(first children) (rest children)]
+                             [nil children])]
+      [tag attrs children]))
+
+
+  (defn polygon [args & children]
+    (apply create-element "polygon"
+           (if (vector? (:points args))
+             (update args :points (fn [points]
+                                    (reduce (fn [s [x y]]
+                                              (str s x "," y " "))
+                                            ""
+                                            points)))
+             args)
+           children))
+
+  (polygon {:points [[1 2] [3 4]]})
+
+  ;
+  )
