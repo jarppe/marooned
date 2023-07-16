@@ -36,14 +36,21 @@
                                     :repeatCount   "indefinite"}))))
 
 
-(def wall-path
+(def cave-path
   "m 2025,850 100,100 h 450 l 300,-300 h 500 l 150,250 h 800 l 150,-250 h 450 l 150,300 H 7125 V 152 l -650,-2 v 550 l 50,50 h 350 L 6975,650 V 400 l -50,-50 h -200 l -50,50 v 200 h -50 V 350 l 50,-50 h 300 l 50,50 V 700 L 6925,800 H 6225 L 6075,650 V 100 H 5075 L 4925,400 H 4475 L 4335,150 H 3525 L 3375,300 H 2625 V 650 L 2475,800 H 2175 V 600 h 300 V 350 H 2175 L 2025,450 V 700 H 1325 L 775,500 1325,300 h 700 V 150 H 775 L 275,350 h -500 v 300 h 500 l 500,200 Z")
 
 
+(def hull-points [[0 -20]
+                  [18 12]
+                  [12 20]
+                  [-12 20]
+                  [-18 12]])
+
+
 (defn make-game-scene []
-  (let [wall                  (svg/path {:stroke "none"
+  (let [cave                  (svg/path {:stroke "none"
                                          :fill   "green"
-                                         :d      wall-path})
+                                         :d      cave-path})
         speed                 (svg/line {:stroke       "green"
                                          :stroke-width 2
                                          :x1           0
@@ -60,41 +67,13 @@
                                (svg/polygon {:stroke       "red"
                                              :stroke-width 3
                                              :fill         "var(--text-color)"
-                                             :points       [[0 -20]
-                                                            [18 12]
-                                                            [12 20]
-                                                            [-12 20]
-                                                            [-18 12]]}))
+                                             :points       hull-points}))
         ship                  (svg/g hull speed)
-        scene                 (svg/g
-                               (svg/g wall)
-                               ship
-                               (svg/circle {:stroke       "green"
-                                            :stroke-width 3
-                                            :fill         "none"
-                                            :cx           0
-                                            :cy           0
-                                            :r            30})
-                               (svg/circle {:stroke       "green"
-                                            :stroke-width 3
-                                            :fill         "none"
-                                            :cx           1000
-                                            :cy           0
-                                            :r            30})
-                               (svg/circle {:stroke       "green"
-                                            :stroke-width 3
-                                            :fill         "none"
-                                            :cx           1000
-                                            :cy           1000
-                                            :r            30})
-                               (svg/circle {:stroke       "green"
-                                            :stroke-width 3
-                                            :fill         "none"
-                                            :cx           0
-                                            :cy           1000
-                                            :r            30}))]
+        board                 (svg/g cave ship)
+        scene                 (svg/g board)]
     {:scene                 scene
-     :wall                  wall
+     :board                 board
+     :cave                  cave
      :ship                  ship
      :hull                  hull
      :left-thruster-cone    left-thruster-cone

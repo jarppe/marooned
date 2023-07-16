@@ -172,3 +172,27 @@
 (def stop (partial create-element "stop"))
 
 (def animate (partial create-element "animate"))
+
+
+(def point (try
+             ; Try standard way:
+             (let [^js elem (circle {})]
+               (.isPointInFill elem (js/DOMPoint 0 0)))
+             (fn [x y]
+               (js/DOMPoint. x y))
+             (catch :default _e
+               ; Chrome still uses non-standrd way:
+               (let [svg (aget (js/document.getElementsByTagName "svg") 0)]
+                 (fn [x y]
+                   (let [point (.createSVGPoint svg)]
+                     (set! (.-x point) x)
+                     (set! (.-y point) y)
+                     point))))))
+
+
+(defn is-point-in? [^js elem p]
+  (.isPointInFill elem p))
+
+
+(defn is-xy-in? [^js elem x y]
+  (.isPointInFill elem (point x y)))

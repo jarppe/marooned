@@ -3,7 +3,8 @@
             [marooned.audio :as audio]
             [marooned.util :as u]
             [marooned.svg :as svg]
-            [marooned.debug :as debug]))
+            [marooned.debug :as debug]
+            [marooned.scene :as scene]))
 
 
 (def ^:const PI js/Math.PI)
@@ -31,7 +32,7 @@
                 :y  500.0
                 :vh 0.0
                 :vs 0.0
-                :h  0.0
+                :h  PIp2
                 :dh 0.0})
 
 
@@ -43,6 +44,19 @@
     [(atan x y)
      (sqrt (+ (* x x) (* y y)))
      x (- y)]))
+
+
+(defn hull-point-inside [^js cave x y h]
+  (let [s (sin h)
+        c (cos h)]
+    (fn [[px py]]
+      (let [x' (+ x (* s px))
+            y' (+ y (* c py))]
+        (svg/is-xy-in? cave x' y')))))
+
+
+(defn hull-inside? [cave x y h]
+  (every? (hull-point-inside cave x y h) scene/hull-points))
 
 
 (defn handle-thrusters [state]
@@ -63,11 +77,13 @@
                                0.0)
         [nh nv nx ny]        (vec+ (:vh state) (:vs state) h forward-thruster)
         x                    (+ (:x state) nx)
-        y                    (+ (:y state) ny)]
-    (svg/set-attr (:scene state) :translate [(+ x 500) 0])
+        y                    (+ (:y state) ny)
+        ok?                  (hull-inside? (:cave state) x y h)]
+    (js/console.log "ok?" ok?)
+    (svg/set-attr (:board state) :translate [(- 1000 x) 0])
+    (svg/set-attr (:ship state) :translate [x y])
     (svg/set-attr (:speed state) :rotate (rad->deg nh) :y2 (* -100 nv))
     (svg/set-attr (:hull state) :rotate (rad->deg h))
-    (svg/set-attr (:ship state) :translate [0 y])
     (assoc state
            :x x
            :y y

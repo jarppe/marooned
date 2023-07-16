@@ -11,7 +11,8 @@
                                                    :balance 0.0}]
              [:right-thruster "audio/thruster.mp3" {:loop    true
                                                     :balance 1.0}]
-             [:forward-thruster "audio/rocket.mp3" {:loop true}]
+             [:forward-thruster "audio/rocket.mp3" {:loop   true
+                                                    :volume 0.2}]
              [:cannon "audio/cannon.mp3" {:volume 0.1}]])
 
 
