@@ -1,7 +1,8 @@
 (ns marooned.scene
   (:require [marooned.state :as state]
             [marooned.util :as u]
-            [marooned.svg :as svg]))
+            [marooned.svg :as svg]
+            [marooned.shapes :as shapes]))
 
 
 
@@ -14,7 +15,7 @@
         scale   (min (/ width 2000.0)
                      (/ height 1000.0))]
     (svg/set-attr (u/get-elem "game") :viewBox (str "0 0 " width " " height))
-    (svg/set-attr scene :scale scale)))
+    (svg/set-attr scene :scale scale :translate [0 (/ (- height (* scale 1000)) 2.0)])))
 
 
 (defn make-thruster-cone [x y r]
@@ -36,10 +37,6 @@
                                     :repeatCount   "indefinite"}))))
 
 
-(def cave-path
-  "m 2025,850 100,100 h 450 l 300,-300 h 500 l 150,250 h 800 l 150,-250 h 450 l 150,300 H 7125 V 152 l -650,-2 v 550 l 50,50 h 350 L 6975,650 V 400 l -50,-50 h -200 l -50,50 v 200 h -50 V 350 l 50,-50 h 300 l 50,50 V 700 L 6925,800 H 6225 L 6075,650 V 100 H 5075 L 4925,400 H 4475 L 4335,150 H 3525 L 3375,300 H 2625 V 650 L 2475,800 H 2175 V 600 h 300 V 350 H 2175 L 2025,450 V 700 H 1325 L 775,500 1325,300 h 700 V 150 H 775 L 275,350 h -500 v 300 h 500 l 500,200 Z")
-
-
 (def hull-points [[0 -20]
                   [18 12]
                   [12 20]
@@ -48,9 +45,10 @@
 
 
 (defn make-game-scene []
-  (let [cave                  (svg/path {:stroke "none"
-                                         :fill   "green"
-                                         :d      cave-path})
+  (let [cave                  (svg/path {:stroke       "gray"
+                                         :stroke-width 2
+                                         :fill         "dark-gray"
+                                         :d            shapes/cave-path})
         speed                 (svg/line {:stroke       "green"
                                          :stroke-width 2
                                          :x1           0
@@ -69,9 +67,27 @@
                                              :fill         "var(--text-color)"
                                              :points       hull-points}))
         ship                  (svg/g hull speed)
-        board                 (svg/g cave ship)
-        scene                 (svg/g board)]
-    {:scene                 scene
+        board                 (svg/g
+                               (svg/rect {:x      -1000
+                                          :y      -1000
+                                          :width  10000
+                                          :height 3000
+                                          :fill   "url(#soil-pattern)"})
+                               cave
+                               ship)
+        scene                 (svg/g board)
+        root                  [(svg/defs
+                                 (svg/pattern {:id           "soil-pattern"
+                                               :x            0
+                                               :y            0
+                                               :width        100
+                                               :height       100
+                                               :patternUnits "userSpaceOnUse"}
+                                              (svg/path {:fill "dark-gray"
+                                                         :d    shapes/soil-pattern})))
+                               scene]]
+    {:root                  root
+     :scene                 scene
      :board                 board
      :cave                  cave
      :ship                  ship
@@ -87,7 +103,7 @@
     (swap! state/app-state merge scene)
     (-> "game"
         (u/clear-elem)
-        (u/append (:scene scene)))
+        (u/append* (:root scene)))
     (js/setTimeout on-resize 0)))
 
 

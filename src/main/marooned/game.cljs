@@ -32,7 +32,7 @@
                 :y  500.0
                 :vh 0.0
                 :vs 0.0
-                :h  PIp2
+                :h  0.0
                 :dh 0.0})
 
 
@@ -46,14 +46,17 @@
      x (- y)]))
 
 
-(defn hull-point-inside [^js cave x y h]
-  (let [s (sin h)
-        c (cos h)]
-    (fn [[px py]]
-      (let [x' (+ x (* s px))
-            y' (+ y (* c py))]
-        (svg/is-xy-in? cave x' y')))))
-
+(defn hull-point-inside [cave ship-x ship-y h]
+  (let [sin-h (sin h)
+        cos-h (cos h)]
+    (fn [[x y]]
+      ; x' = 𝑥 cos 𝜃 + 𝑦 sin 𝜃
+      ; y' = 𝑦 cos 𝜃 − 𝑥 sin 𝜃
+      (let [x' (+ (* x cos-h) (* y sin-h))
+            y' (- (* y cos-h) (* x sin-h))]
+        (svg/is-xy-in? cave
+                       (+ ship-x x')
+                       (+ ship-y y'))))))
 
 (defn hull-inside? [cave x y h]
   (every? (hull-point-inside cave x y h) scene/hull-points))
@@ -78,8 +81,8 @@
         [nh nv nx ny]        (vec+ (:vh state) (:vs state) h forward-thruster)
         x                    (+ (:x state) nx)
         y                    (+ (:y state) ny)
-        ok?                  (hull-inside? (:cave state) x y h)]
-    (js/console.log "ok?" ok?)
+        ok?                  (hull-inside? (:cave state) x y (- h))]
+    (svg/set-attr (:cave state) :stroke (if ok? "gray" "red"))
     (svg/set-attr (:board state) :translate [(- 1000 x) 0])
     (svg/set-attr (:ship state) :translate [x y])
     (svg/set-attr (:speed state) :rotate (rad->deg nh) :y2 (* -100 nv))

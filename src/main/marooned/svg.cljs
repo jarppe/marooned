@@ -158,7 +158,7 @@
 (def defs (partial create-element "defs"))
 
 (def clip-path (partial create-element "clipPath"))
-
+(def pattern (partial create-element "pattern"))
 (def filter (partial create-element "filter"))
 (def fe-gaussian-blur (partial create-element "feGaussianBlur"))
 (def fe-drop-shadow (partial create-element "feGaussianBlur"))
@@ -182,9 +182,9 @@
                (js/DOMPoint. x y))
              (catch :default _e
                ; Chrome still uses non-standrd way:
-               (let [svg (aget (js/document.getElementsByTagName "svg") 0)]
+               (let [svg (delay (create-element "svg"))]
                  (fn [x y]
-                   (let [point (.createSVGPoint svg)]
+                   (let [point (.createSVGPoint @svg)]
                      (set! (.-x point) x)
                      (set! (.-y point) y)
                      point))))))
