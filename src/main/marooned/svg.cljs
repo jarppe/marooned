@@ -1,5 +1,5 @@
 (ns marooned.svg
-  (:refer-clojure :exclude (filter))
+  (:refer-clojure :exclude (filter set))
   (:require [clojure.string :as str]
             [goog.object :as g]))
 
@@ -13,7 +13,7 @@
                      :skew])
 
 
-(def transform-attr? (set transform-attr))
+(def transform-attr? (clojure.core/set transform-attr))
 (def special-attr? (conj transform-attr? :transform))
 
 
@@ -62,7 +62,7 @@
   (let [attrs (merge-special-attrs elem specials)]
     (doseq [transform-attr-name transform-attr?]
       (g/set elem transform-attr-name (transform-attr-name attrs)))
-    (.setAttributeNS elem nil "transform" (format-transform attrs)))
+    (.setAttribute elem "transform" (format-transform attrs)))
   elem)
 
 
@@ -74,7 +74,7 @@
                        specials
                        (let [special? (special-attr? attr-name)]
                          (when-not special?
-                           (.setAttributeNS elem nil (name attr-name) (str attr-value)))
+                           (.setAttribute elem (name attr-name) (str attr-value)))
                          (recur (if special?
                                   (conj specials [attr-name attr-value])
                                   specials)
@@ -85,7 +85,7 @@
 
 
 (defn get-attr [elem attr-name]
-  (.getAttributeNS elem  nil (name attr-name)))
+  (.getAttribute elem (name attr-name)))
 
 
 (defn append* [elem children]
@@ -107,8 +107,6 @@
     (g/set elem "rotate" 0.0)
     (g/set elem "scale" 1.0)
     (apply set-attr elem (mapcat identity attrs))
-    (when (#{"polygon" "path"} tag)
-      (js/console.log "create-element:" tag (pr-str children)))
     (doseq [c children]
       (if (sequential? c)
         (append* elem c)
@@ -116,20 +114,8 @@
     elem))
 
 
-(defn svg [& args]
-  (let [[attrs children] (if (map? (first args))
-                           [(first args) (rest args)]
-                           [nil args])]
-    (create-element "svg" (merge {:version "1.1"
-                                  :xmlns   xmlns}
-                                 attrs)
-                    children)))
-
-
-
+(def svg (partial create-element "svg"))
 (def g (partial create-element "g"))
-
-
 (def circle (partial create-element "circle"))
 (def ellipse (partial create-element "ellipse"))
 (def rect (partial create-element "rect"))
@@ -170,29 +156,50 @@
 (def linear-gradient (partial create-element "linearGradient"))
 (def radial-gradient (partial create-element "radialGradient"))
 (def stop (partial create-element "stop"))
+(def set (partial create-element "set"))
+
+
+(defn mpath [id]
+  (let [elem (create-element "mpath")]
+    (.setAttribute elem "href" (str "#" id))
+    elem))
+
 
 (def animate (partial create-element "animate"))
+(def animate-motion (partial create-element "animateMotion"))
 
 
 (def point (try
              ; Try standard way:
              (let [^js elem (circle {})]
                (.isPointInFill elem (js/DOMPoint 0 0)))
-             (fn [x y]
-               (js/DOMPoint. x y))
+             (fn
+               ([]
+                (js/DOMPoint.))
+               ([x y]
+                (js/DOMPoint. x y)))
              (catch :default _e
                ; Chrome still uses non-standrd way:
                (let [svg (delay (create-element "svg"))]
-                 (fn [x y]
-                   (let [point (.createSVGPoint @svg)]
-                     (set! (.-x point) x)
-                     (set! (.-y point) y)
-                     point))))))
+                 (fn
+                   ([]
+                    (.createSVGPoint @svg))
+                   ([x y]
+                    (let [point (.createSVGPoint @svg)]
+                      (set! (.-x point) x)
+                      (set! (.-y point) y)
+                      point)))))))
 
 
-(defn is-point-in? [^js elem p]
-  (.isPointInFill elem p))
+(defn set-point [^js pt x y]
+  (set! (.-x pt) x)
+  (set! (.-y pt) y)
+  pt)
 
 
-(defn is-xy-in? [^js elem x y]
-  (.isPointInFill elem (point x y)))
+(defn is-xy-in?
+  ([^js elem pt]
+   (.isPointInFill elem pt))
+  ([^js elem x y]
+   (.isPointInFill elem (point x y))))
+

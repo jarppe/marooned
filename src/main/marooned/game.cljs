@@ -27,13 +27,14 @@
 (def ^:const forward-thruster-delta 0.01)
 
 
-(def init-game {:ts 0
-                :x  0.0
-                :y  500.0
-                :vh 0.0
-                :vs 0.0
-                :h  0.0
-                :dh 0.0})
+(def init-game {:ts           0
+                :x            0.0
+                :y            500.0
+                :vh           0.0
+                :vs           0.0
+                :h            PIp2
+                :dh           0.0
+                :got-diamond? false})
 
 
 (defn vec+ [h1 v1 h2 v2]
@@ -46,20 +47,24 @@
      x (- y)]))
 
 
-(defn hull-point-inside [cave ship-x ship-y h]
+(defn hull-point-inside [shape ship-x ship-y h]
   (let [sin-h (sin h)
-        cos-h (cos h)]
+        cos-h (cos h)
+        pt    (svg/point)]
     (fn [[x y]]
       ; x' = 𝑥 cos 𝜃 + 𝑦 sin 𝜃
       ; y' = 𝑦 cos 𝜃 − 𝑥 sin 𝜃
       (let [x' (+ (* x cos-h) (* y sin-h))
             y' (- (* y cos-h) (* x sin-h))]
-        (svg/is-xy-in? cave
-                       (+ ship-x x')
-                       (+ ship-y y'))))))
+        (svg/is-xy-in? shape (svg/set-point pt (+ ship-x x') (+ ship-y y')))))))
 
-(defn hull-inside? [cave x y h]
-  (every? (hull-point-inside cave x y h) scene/hull-points))
+
+(defn ship-inside? [shape ship-x ship-y ship-h]
+  (every? (hull-point-inside shape ship-x ship-y ship-h) scene/hull-points))
+
+
+(defn ship-touches? [shape ship-x ship-y ship-h]
+  (some (hull-point-inside shape ship-x ship-y ship-h) scene/hull-points))
 
 
 (defn handle-thrusters [state]
@@ -81,24 +86,29 @@
         [nh nv nx ny]        (vec+ (:vh state) (:vs state) h forward-thruster)
         x                    (+ (:x state) nx)
         y                    (+ (:y state) ny)
-        ok?                  (hull-inside? (:cave state) x y (- h))]
+        inside-cave?         (ship-inside? (:cave state) x y (- h))
+        got-diamond?         (and (not (:got-diamond? state))
+                                  (ship-touches? (:diamond state) x y (- h)))
+        touch-ufo?           (ship-touches? (-> state :ufo :hull) x y (- h))
+        ok?                  (and inside-cave? (not touch-ufo?))]
+    (when got-diamond?
+      (svg/set-attr (:diamond state) :fill "rgb(71, 71, 30)"))
     (svg/set-attr (:cave state) :stroke (if ok? "gray" "red"))
     (svg/set-attr (:board state) :translate [(- 1000 x) 0])
     (svg/set-attr (:ship state) :translate [x y])
     (svg/set-attr (:speed state) :rotate (rad->deg nh) :y2 (* -100 nv))
     (svg/set-attr (:hull state) :rotate (rad->deg h))
-    (assoc state
-           :x x
-           :y y
-           :vh nh
-           :vs nv
-           :h h
-           :dh dh)))
+    (cond-> (assoc state
+                   :x x :y y
+                   :vh nh :vs nv
+                   :h h :dh dh)
+      got-diamond? (assoc :got-diamond? true))))
 
 
 (defn tick [state ts]
   (let [prev-ts (:ts state)
         dt      (- ts prev-ts)]
+    ((-> state :ufo :update-pos) ts)
     (-> state
         (assoc :dt dt)
         (handle-thrusters)

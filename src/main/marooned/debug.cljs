@@ -23,7 +23,8 @@
    [:dh num-fmt]
    [:left-thruster thruster]
    [:right-thruster thruster]
-   [:forward-thruster thruster]])
+   [:forward-thruster thruster]
+   [:got-diamond? (fn [v] (if v "true" "false"))]])
 
 
 (defn insert-debug-panel []

@@ -2,8 +2,8 @@
   (:require [marooned.state :as state]
             [marooned.util :as u]
             [marooned.svg :as svg]
-            [marooned.shapes :as shapes]))
-
+            [marooned.shapes :as shapes]
+            [marooned.ufo :as ufo]))
 
 
 (defn on-resize [_]
@@ -44,48 +44,93 @@
                   [-18 12]])
 
 
+(defn make-diamond []
+  (let [diamond-x     2350
+        diamond-y     500
+        diamond       (svg/polygon {:stroke-width 2
+                                    :stroke       "yellow"
+                                    :fill         "rgb(209, 209, 89)"
+                                    :points       (mapv (fn [[x y]] [(+ diamond-x x) (+ diamond-y y)])
+                                                        [[-30 0]
+                                                         [0 -40]
+                                                         [30 0]
+                                                         [0 40]])})
+        diamond-shape (svg/g {:stroke-width 2
+                              :stroke       "yellow"
+                              :fill         "none"
+                              :translate    [diamond-x diamond-y]}
+                             (svg/polyline {:points [[-30 0]
+                                                     [0 10]
+                                                     [30 0]]})
+                             (for [y1 [-40 40]]
+                               (svg/line {:x1 0
+                                          :y1 y1
+                                          :x2 0
+                                          :y2 0}
+                                         (svg/animate {:attributeName "x2"
+                                                       :values        "-30;30"
+                                                       :dur           "2s"
+                                                       :repeatCount   "indefinite"})
+                                         (svg/animate {:attributeName "y2"
+                                                       :values        "0;5;0"
+                                                       :dur           "2s"
+                                                       :repeatCount   "indefinite"}))))]
+    [diamond diamond-shape]))
+
+
+(defn make-defs []
+  (svg/defs
+    (svg/pattern {:id           "soil-pattern"
+                  :x            0
+                  :y            0
+                  :width        100
+                  :height       100
+                  :patternUnits "userSpaceOnUse"}
+                 (svg/path {:fill "dark-gray"
+                            :d    shapes/soil-pattern}))))
+
+
+
 (defn make-game-scene []
-  (let [cave                  (svg/path {:stroke       "gray"
-                                         :stroke-width 2
-                                         :fill         "dark-gray"
-                                         :d            shapes/cave-path})
-        speed                 (svg/line {:stroke       "green"
-                                         :stroke-width 2
-                                         :x1           0
-                                         :y1           0
-                                         :x2           0
-                                         :y2           0})
-        left-thruster-cone    (make-thruster-cone 8 -8 90)
-        right-thruster-cone   (make-thruster-cone -8 -8 -90)
-        forward-thruster-cone (make-thruster-cone 0 20 0)
-        hull                  (svg/g
-                               left-thruster-cone
-                               right-thruster-cone
-                               forward-thruster-cone
-                               (svg/polygon {:stroke       "red"
-                                             :stroke-width 3
-                                             :fill         "var(--text-color)"
-                                             :points       hull-points}))
-        ship                  (svg/g hull speed)
-        board                 (svg/g
-                               (svg/rect {:x      -1000
-                                          :y      -1000
-                                          :width  10000
-                                          :height 3000
-                                          :fill   "url(#soil-pattern)"})
-                               cave
-                               ship)
-        scene                 (svg/g board)
-        root                  [(svg/defs
-                                 (svg/pattern {:id           "soil-pattern"
-                                               :x            0
-                                               :y            0
-                                               :width        100
-                                               :height       100
-                                               :patternUnits "userSpaceOnUse"}
-                                              (svg/path {:fill "dark-gray"
-                                                         :d    shapes/soil-pattern})))
-                               scene]]
+  (let [cave                    (svg/path {:stroke       "gray"
+                                           :stroke-width 2
+                                           :fill         "dark-gray"
+                                           :d            shapes/cave-path})
+        background              (svg/rect {:x      -1000
+                                           :y      -1000
+                                           :width  10000
+                                           :height 3000
+                                           :fill   "url(#soil-pattern)"})
+        left-thruster-cone      (make-thruster-cone 8 -8 90)
+        right-thruster-cone     (make-thruster-cone -8 -8 -90)
+        forward-thruster-cone   (make-thruster-cone 0 20 0)
+        hull                    (svg/g
+                                 left-thruster-cone
+                                 right-thruster-cone
+                                 forward-thruster-cone
+                                 (svg/polygon {:stroke       "red"
+                                               :stroke-width 3
+                                               :fill         "var(--text-color)"
+                                               :points       hull-points}))
+        speed                   (svg/line {:stroke       "green"
+                                           :stroke-width 2
+                                           :x1           0
+                                           :y1           0
+                                           :x2           0
+                                           :y2           0})
+        ship                    (svg/g hull speed)
+        [diamond diamond-shape] (make-diamond)
+        ufo                     (ufo/make-ufo 200 200 600 600 20)
+        board                   (svg/g
+                                 background
+                                 cave
+                                 diamond
+                                 diamond-shape
+                                 ship
+                                 (:shape ufo))
+        scene                   (svg/g board)
+        root                    [(make-defs)
+                                 scene]]
     {:root                  root
      :scene                 scene
      :board                 board
@@ -95,7 +140,9 @@
      :left-thruster-cone    left-thruster-cone
      :right-thruster-cone   right-thruster-cone
      :forward-thruster-cone forward-thruster-cone
-     :speed                 speed}))
+     :speed                 speed
+     :diamond               diamond
+     :ufo                   ufo}))
 
 
 (defn ^:dev/after-load reset-scene []
