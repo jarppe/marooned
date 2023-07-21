@@ -1,7 +1,8 @@
 (ns marooned.svg
   (:refer-clojure :exclude (filter set))
   (:require [clojure.string :as str]
-            [goog.object :as g]))
+            [goog.object :as g]
+            [marooned.util :as u]))
 
 
 (def ^:const xmlns "http://www.w3.org/2000/svg")
@@ -67,31 +68,34 @@
 
 
 (defn set-attr [elem & attrs]
-  (when (seq attrs)
-    (let [specials (loop [specials                      []
-                          [attr-name attr-value & more] attrs]
-                     (if-not attr-name
-                       specials
-                       (let [special? (special-attr? attr-name)]
-                         (when-not special?
-                           (.setAttribute elem (name attr-name) (str attr-value)))
-                         (recur (if special?
-                                  (conj specials [attr-name attr-value])
-                                  specials)
-                                more))))]
-      (when (seq specials)
-        (set-special-attrs elem specials))))
-  elem)
+  (let [elem (u/get-elem elem)]
+    (when (seq attrs)
+      (let [specials (loop [specials                      []
+                            [attr-name attr-value & more] attrs]
+                       (if-not attr-name
+                         specials
+                         (let [special? (special-attr? attr-name)]
+                           (when-not special?
+                             (.setAttribute elem (name attr-name) (str attr-value)))
+                           (recur (if special?
+                                    (conj specials [attr-name attr-value])
+                                    specials)
+                                  more))))]
+        (when (seq specials)
+          (set-special-attrs elem specials))))
+    elem))
 
 
 (defn get-attr [elem attr-name]
-  (.getAttribute elem (name attr-name)))
+  (let [elem (u/get-elem elem)]
+    (.getAttribute elem (name attr-name))))
 
 
 (defn append* [elem children]
-  (doseq [c children]
-    (.appendChild elem c))
-  elem)
+  (let [elem (u/get-elem elem)]
+    (doseq [c children]
+      (.appendChild elem c))
+    elem))
 
 
 (defn append [elem & children]

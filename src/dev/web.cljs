@@ -1,6 +1,7 @@
 (ns web
   (:require [clojure.string :as str]
-            [goog.object :as g]))
+            [goog.object :as g]
+            [marooned.state :as state]))
 
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
@@ -15,6 +16,12 @@
   (def ^:const atan js/Math.atan2)
   (def ^:const sqrt js/Math.sqrt)
 
+
+  (require '[marooned.state :as state])
+  (js/console.log "state:" (pr-str @state/app-state))
+  (+ 1 2)
+  (.-performance js/window)
+  .performance.now
 
   (sin 0)
   (atan 1 0)

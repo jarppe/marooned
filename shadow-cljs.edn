@@ -3,11 +3,11 @@
                  :output-dir       "public"
                  :asset-path       "."
                  :modules          {:shared {:entries []}
-                                    :app    {:entries    [marooned.app]
-                                             :depends-on #{:shared}}
-                                    :worker {:init-fn    marooned.worker/init
+                                    :worker {:web-worker true
                                              :depends-on #{:shared}
-                                             :web-worker true}}
+                                             :init-fn    marooned.worker/init}
+                                    :app    {:depends-on #{:shared}
+                                             :entries    [marooned.app]}}
                  :compiler-options {:output-feature-set :es8}
                  :devtools         {:after-load marooned.app/run
                                     :http-root  "public"

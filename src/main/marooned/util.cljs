@@ -2,6 +2,20 @@
   (:require [goog.object :as g]))
 
 
+(def ^:const PI js/Math.PI)
+(def ^:const PIp2 (/ js/Math.PI 2.0))
+(def ^:const PIx2 (* js/Math.PI 2.0))
+
+(def ^:const sin js/Math.sin)
+(def ^:const cos js/Math.cos)
+(def ^:const atan js/Math.atan2)
+(def ^:const sqrt js/Math.sqrt)
+
+
+(defn deg->rad [v] (-> v (/ 180.0) (* PI)))
+(defn rad->deg [v] (-> v (/ PI) (* 180.0)))
+
+
 (defn js-get [elem key]
   (when elem
     (g/get elem key)))
@@ -41,6 +55,17 @@
     (if (> value max-value)
       max-value
       value)))
+
+
+(defn vec+ [h1 v1 h2 v2]
+  (let [x (+ (* v1 (sin h1))
+             (* v2 (sin h2)))
+        y (+ (* v1 (cos h1))
+             (* v2 (cos h2)))]
+    {:h  (atan x y)
+     :v  (sqrt (+ (* x x) (* y y)))
+     :dx x
+     :dy (- y)}))
 
 
 (defn get-elem ^js [id]

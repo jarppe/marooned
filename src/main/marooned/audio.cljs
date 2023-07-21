@@ -7,12 +7,12 @@
 (def ^:const default-volume 0.5)
 
 
-(def audios [[:left-thruster "audio/thruster.mp3" {:loop    true
-                                                   :balance 0.0}]
-             [:right-thruster "audio/thruster.mp3" {:loop    true
-                                                    :balance 1.0}]
-             [:forward-thruster "audio/rocket.mp3" {:loop   true
-                                                    :volume 0.2}]
+(def audios [[:left "audio/thruster.mp3" {:loop    true
+                                          :balance 1.0}]
+             [:right "audio/thruster.mp3" {:loop    true
+                                           :balance 0.0}]
+             [:forward "audio/rocket.mp3" {:loop   true
+                                           :volume 0.2}]
              [:cannon "audio/cannon.mp3" {:volume 0.1}]])
 
 
@@ -27,24 +27,47 @@
                     audios))
 
 
+(defn get-sound ^js [sound-name]
+  (get sounds sound-name))
+
+
+(defn- -play [^js sound balance]
+  (when balance
+    (.stereo sound balance))
+  (.play sound))
+
+
+(defn play
+  ([state sound-name] (play state sound-name nil))
+  ([state sound-name balance]
+   (let [sound (get-sound sound-name)]
+     (-play sound balance)
+     state)))
+
+
 (defn play-on
-  ([sound-name] (play-on sound-name nil))
-  ([sound-name balance]
-   (let [^js sound (sounds sound-name)]
-     (when balance
-       (.stereo sound balance))
-     (.play sound))))
+  ([state sound-name] (play-on state sound-name nil))
+  ([state sound-name balance]
+   (let [sound (get-sound sound-name)]
+     (when-let [sound-id (-> state :sound sound-name)]
+       (.stop sound sound-id))
+     (let [sound-id (-play sound balance)]
+       (update state :sound assoc sound-name sound-id)))))
 
 
 (defn play-off
-  ([sound-name sound-id] (play-off sound-name sound-id 100))
-  ([sound-name sound-id delay]
-   (let [sound (sounds sound-name)]
-     (.fade ^js sound (.volume sound) 0 delay sound-id)
-     nil)))
+  ([state sound-name] (play-off state sound-name nil))
+  ([state sound-name delay]
+   (let [sound    (get-sound sound-name)
+         sound-id (-> state :sound sound-name)]
+     (when sound-id
+       (if delay
+         (.fade sound (.volume sound) 0 delay sound-id)
+         (.stop sound sound-id))
+       (update state :sound dissoc sound-name))
+     state)))
 
-
-(defn set-sound-on [on?]
+(defn- set-sound-on! [on?]
   (js/console.log "set-sound-on" on?)
   (if on?
     (u/add-class "sound" "active")
@@ -52,7 +75,9 @@
   (.mute Howler (not on?)))
 
 
-(defn init! []
-  (u/add-event-listener "sound" :click (fn [_] (swap! state/app-state update :sound-on? not)))
-  (state/on-change :sound-on? set-sound-on)
-  (swap! state/app-state assoc :sound-on? true))
+(defn init [state]
+  (u/add-event-listener "sound" :click (fn [_] (swap! state/app-state update :sound-on? (fn [sound-was-on?]
+                                                                                          (let [sound-on? (not sound-was-on?)]
+                                                                                            (set-sound-on! sound-on?)
+                                                                                            sound-on?)))))
+  (assoc state :sound-on? true))

@@ -40,8 +40,8 @@
 
 (defn make-elem []
   (let [attrs (atom {})
-        elem  #js {"setAttributeNS" (fn [_ attr-name attr-value]
-                                      (swap! attrs assoc attr-name attr-value))}]
+        elem  #js {"setAttribute" (fn [attr-name attr-value]
+                                    (swap! attrs assoc attr-name attr-value))}]
     [elem attrs]))
 
 
