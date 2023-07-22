@@ -10,8 +10,7 @@
 
 (defn reset [state]
   (-> state
-      (assoc :start-time (.now (.-performance js/window))
-             :status {:status :run
+      (assoc :status {:status :run
                       :ts     (:ts state)})
       (ship/reset)
       (ufo/reset)
@@ -59,6 +58,7 @@
 
 (defn init [state]
   (-> state
+      (assoc :ts (.now (.-performance js/window)))
       (ship/create)
       (ufo/create)
       (diamond/create)

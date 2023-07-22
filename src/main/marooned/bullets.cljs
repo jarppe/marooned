@@ -2,10 +2,11 @@
   (:require [marooned.svg :as svg]
             [marooned.audio :as audio]
             [marooned.ufo :as ufo]
-            [marooned.util :as u :refer [sin cos atan sqrt]]))
+            [marooned.util :as u :refer [sin cos]]))
 
 
 (def ^:const bullet-speed 10)
+(def ^:const cannon-cooling-ms 2000)
 
 
 (defn create [state]
@@ -22,6 +23,7 @@
 (defn reset [state]
   (update state :bullets (fn [s]
                            (-> s
+                               (assoc :ship-fire-ts (:ts state))
                                (update :ship-bullets (fn [b]
                                                        (u/clear-elem (:g b))
                                                        (assoc b :b ())))
@@ -87,8 +89,12 @@
 
 
 (defn shoot [state]
-  (-> state
-      (audio/play :cannon)
-      (add-bullet)))
+  (if (< (- (:ts state) (-> state :bullets :ship-fire-ts)) cannon-cooling-ms)
+    (do (js/console.log "too soon!" (:ts state) (-> state :bullets :ship-fire-ts) "=>" (- (:ts state) (-> state :bullets :ship-fire-ts)))
+        (audio/play state :click))
+    (-> state
+        (audio/play :cannon)
+        (assoc-in [:bullets :ship-fire-ts] (:ts state))
+        (add-bullet))))
 
 

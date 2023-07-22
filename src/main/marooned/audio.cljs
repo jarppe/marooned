@@ -14,7 +14,9 @@
              [:forward "audio/rocket.mp3" {:loop   true
                                            :volume 0.2}]
              [:cannon "audio/cannon.mp3" {:volume 0.1}]
-             [:ufo "audio/ufo.mp3" {:loop true}]])
+             [:click "audio/click.mp3" {:volume 0.2}]
+             [:ufo "audio/ufo.mp3" {:loop true}]
+             [:ufo-explosion "audio/ufo-explosion.mp3"]])
 
 
 (def sounds (reduce (fn [acc [k url opts]]
@@ -29,8 +31,7 @@
 
 
 (defn get-sound ^js [sound-name]
-  (or (get sounds sound-name)
-      (throw (ex-info "unknown sound" {:sound-name sound-name}))))
+  (get sounds sound-name))
 
 
 (defn- -play [^js sound {:keys [balance volume]}]
@@ -47,6 +48,8 @@
    (let [sound (get-sound sound-name)]
      (-play sound opts)
      state)))
+
+(defn ue [] (-play (get-sound :ufo-explosion) nil))
 
 
 (defn play-on

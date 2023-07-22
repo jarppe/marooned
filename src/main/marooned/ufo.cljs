@@ -45,7 +45,8 @@
 (defn reset [state]
   (svg/set-attr (-> state :ufo :hull) :fill hull-fill)
   (svg/set-attr (-> state :ufo :cockpit) :fill cockpit-fill)
-  (update state :ufo assoc :active? false))
+  (svg/set-attr (-> state :ufo :g) :display "on")
+  (update state :ufo assoc :active? true))
 
 
 (defn handle-ufo-collision [state]
@@ -68,8 +69,8 @@
 
 
 (defn tick [state]
-  (if (and (-> state :status :status (= :run))
-           (-> state :ufo :killed? (not)))
+  (if (and (-> state :ufo :active?)
+           (-> state :status :status (= :run)))
     (let [{:keys [path path-len hull cockpit]} (:ufo state)
           n                                    (mod (/ (:ts state) 15) path-len)
           p                                    (.getPointAtLength path n)
@@ -86,6 +87,10 @@
 
 
 (defn kill [state]
-  (-> state
-      (audio/play-off :ufo 1000)
-      (update :ufo assoc :killed? true)))
+  (if (-> state :ufo :active?)
+    (do (svg/set-attr (-> state :ufo :g) :display "none")
+        (-> state
+            (audio/play-off :ufo)
+            (audio/play :ufo-explosion)
+            (update :ufo assoc :active? false)))
+    state))
