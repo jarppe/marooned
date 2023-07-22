@@ -1,5 +1,6 @@
 (ns marooned.debug
-  (:require [marooned.util :as util]))
+  (:require [marooned.util :as util]
+            [clojure.string :as str]))
 
 
 (defn- num-fmt [^js v]
@@ -13,7 +14,11 @@
 
 
 (def debug-items
-  [["dt" [:dt num-fmt]]
+  [["status" [:status (fn [{:keys [status reason]}]
+                        (str (name status)
+                             (when reason
+                               (str " (" (name reason) ")"))))]]
+   ["dt" [:dt num-fmt]]
    ["x" [:ship :x num-fmt]]
    ["y" [:ship :y num-fmt]]
    ["vh" [:ship :vh num-fmt]]
@@ -22,7 +27,17 @@
    ["dh" [:ship :dh num-fmt]]
    ["left" [:control :left :on on-off]]
    ["right" [:control :right :on on-off]]
-   ["fwd" [:control :forward :on on-off]]])
+   ["forward" [:control :forward :on on-off]]
+   ["cannon" [:control :cannon :on on-off]]
+   #_["bullets" [:bullets :ship-bullets :b (fn [bullets]
+                                             (str/join " " (map (fn [{:keys [^js pt h]}]
+                                                                  (str "["
+                                                                       (.toFixed (.-x pt) 1)
+                                                                       ", "
+                                                                       (.toFixed (.-y pt) 1)
+                                                                       "] - "
+                                                                       (.toFixed h 1)))
+                                                                bullets)))]]])
 
 
 (defn- insert-debug-panel []

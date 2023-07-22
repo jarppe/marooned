@@ -1,4 +1,5 @@
 (ns marooned.util
+  (:refer-clojure :exclude (remove))
   (:require [goog.object :as g]))
 
 
@@ -138,7 +139,7 @@
     (doseq [[attr-name attr-value] attrs]
       (if (= attr-name :class)
         (add-classes elem (map str (if (sequential? attr-value)
-                                     (remove nil? attr-value)
+                                     (clojure.core/remove nil? attr-value)
                                      (cons attr-value nil))))
         (.setAttribute elem (name attr-name) (str attr-value))))
     (doseq [c children]
@@ -146,6 +147,13 @@
         (append* elem c)
         (append elem c)))
     elem))
+
+
+(defn remove [elem]
+  (let [e (get-elem elem)]
+    (when e
+      (.remove e))
+    e))
 
 
 (defn remove-child [parent child]

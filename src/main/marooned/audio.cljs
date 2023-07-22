@@ -13,7 +13,8 @@
                                            :balance 0.0}]
              [:forward "audio/rocket.mp3" {:loop   true
                                            :volume 0.2}]
-             [:cannon "audio/cannon.mp3" {:volume 0.1}]])
+             [:cannon "audio/cannon.mp3" {:volume 0.1}]
+             [:ufo "audio/ufo.mp3" {:loop true}]])
 
 
 (def sounds (reduce (fn [acc [k url opts]]
@@ -28,31 +29,37 @@
 
 
 (defn get-sound ^js [sound-name]
-  (get sounds sound-name))
+  (or (get sounds sound-name)
+      (throw (ex-info "unknown sound" {:sound-name sound-name}))))
 
 
-(defn- -play [^js sound balance]
+(defn- -play [^js sound {:keys [balance volume]}]
   (when balance
     (.stereo sound balance))
+  (when volume
+    (.volume sound volume))
   (.play sound))
 
 
 (defn play
   ([state sound-name] (play state sound-name nil))
-  ([state sound-name balance]
+  ([state sound-name opts]
    (let [sound (get-sound sound-name)]
-     (-play sound balance)
+     (-play sound opts)
      state)))
 
 
 (defn play-on
   ([state sound-name] (play-on state sound-name nil))
-  ([state sound-name balance]
-   (let [sound (get-sound sound-name)]
-     (when-let [sound-id (-> state :sound sound-name)]
-       (.stop sound sound-id))
-     (let [sound-id (-play sound balance)]
-       (update state :sound assoc sound-name sound-id)))))
+  ([state sound-name {:keys [balance volume]}]
+   (let [sound    (get-sound sound-name)
+         sound-id (or (-> state :sound sound-name)
+                      (-play sound nil))]
+     (when balance
+       (.stereo sound balance))
+     (when volume
+       (.volume sound volume))
+     (update state :sound assoc sound-name sound-id))))
 
 
 (defn play-off
@@ -60,12 +67,13 @@
   ([state sound-name delay]
    (let [sound    (get-sound sound-name)
          sound-id (-> state :sound sound-name)]
-     (when sound-id
-       (if delay
-         (.fade sound (.volume sound) 0 delay sound-id)
-         (.stop sound sound-id))
-       (update state :sound dissoc sound-name))
-     state)))
+     (if sound-id
+       (do (if delay
+             (.fade sound (.volume sound) 0 delay sound-id)
+             (.stop sound sound-id))
+           (update state :sound dissoc sound-name))
+       state))))
+
 
 (defn- set-sound-on! [on?]
   (js/console.log "set-sound-on" on?)

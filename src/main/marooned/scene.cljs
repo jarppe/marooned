@@ -1,10 +1,10 @@
 (ns marooned.scene
-  (:require [marooned.state :as state]
-            [marooned.util :as u]
+  (:require [marooned.util :as u]
             [marooned.svg :as svg]
-            [marooned.shapes :as shapes]
-            [marooned.ufo :as ufo]
-            [marooned.bullets :as bullets]))
+            [marooned.shapes :as shapes]))
+
+
+(def ship-offset-x 300)
 
 
 (defn on-resize [_]
@@ -17,7 +17,7 @@
     (svg/set-attr "scene" :scale scale :translate [0 (/ (- height (* scale 1000.0)) 2.0)])))
 
 
-(defn create-scene [state]
+(defn create [state]
   (let [cave       (svg/path {:stroke       "gray"
                               :stroke-width 2
                               :fill         "dark-gray"
@@ -37,7 +37,10 @@
                               :fill   "url(#soil-pattern)"})
         board      (svg/g background
                           cave
-                          (-> state :ship :g))
+                          (-> state :diamond :g)
+                          (-> state :bullets :g)
+                          (-> state :ship :g)
+                          (-> state :ufo :g))
         scene      (svg/g {:id "scene"} board)]
     (-> (u/clear-elem "game")
         (u/append* [(svg/defs soil)
@@ -47,7 +50,18 @@
                          :cave  cave})))
 
 
+(defn tick [state]
+  (when (-> state :status :ts (= (:ts state)))
+    (svg/set-attr (-> state :scene :cave)
+                  :stroke
+                  (-> state :status :reason (= :cave-collision) (if "red" "gray"))))
+  (svg/set-attr (-> state :scene :board)
+                :translate
+                [(->> state :ship :x (min 5800) (- ship-offset-x)) 0])
+  state)
+
+
 (defn init [state]
   (u/add-event-listener js/window :resize on-resize)
   (js/setTimeout on-resize 0)
-  (create-scene state))
+  (create state))

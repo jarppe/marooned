@@ -116,7 +116,7 @@ h1 {
   z-index: 10;
   background-color: rgba(50, 50, 50, 0.7);
   color: green;
-  font-size: 1.7em;
+  font-size: 1rem;
   font-family: monospace;
   & table tr {
     padding-block: 0.3em;

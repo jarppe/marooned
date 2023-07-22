@@ -1,7 +1,8 @@
 (ns marooned.ship
   (:require [marooned.util :as u :refer [PI PIp2 sin cos]]
             [marooned.svg :as svg]
-            [marooned.audio :as audio]))
+            [marooned.audio :as audio]
+            [marooned.bullets :as bullets]))
 
 
 (def ^:const max-dh (/ PI 1000.0))
@@ -36,7 +37,7 @@
                                     :repeatCount   "indefinite"}))))
 
 
-(defn create-ship [state]
+(defn create [state]
   (let [left-thruster-cone    (make-thruster-cone 8 -8 90)
         right-thruster-cone   (make-thruster-cone -8 -8 -90)
         forward-thruster-cone (make-thruster-cone 0 20 0)
@@ -66,42 +67,28 @@
                                    :forward forward-thruster-cone}
                         :hull     hull
                         :speed    speed
-                        :g        g})))
+                        :g        g
+                        :hull-xys (doall (repeatedly (count hull-points) svg/point))})))
 
 
-(defn handle-reset [state]
-  (if (and (-> state :control :reset :on)
-           (= (-> state :control :reset :ts)
-              (-> state :ts)))
-    (update state :ship merge {:x  0
-                               :y  500
-                               :h  PIp2
-                               :vh 0
-                               :vs 0
-                               :dh 0})
-    state))
+(defn reset [state]
+  (update state :ship merge {:x  4500
+                             :y  500
+                             :h  PIp2
+                             :vh 0
+                             :vs 0
+                             :dh 0}))
 
 
-(defn- hull-point-inside [shape ship-x ship-y h]
+(defn- update-hull-xys! [hull-xys ship-x ship-y h]
   (let [sin-h (sin h)
-        cos-h (cos h)
-        pt    (svg/point)]
-    (fn [[x y]]
-      ; x' = 𝑥 cos 𝜃 + 𝑦 sin 𝜃
-      ; y' = 𝑦 cos 𝜃 − 𝑥 sin 𝜃
-      (let [x' (+ (* x cos-h) (* y sin-h))
-            y' (- (* y cos-h) (* x sin-h))]
-        (svg/is-xy-in? shape (svg/set-point pt (+ ship-x x') (+ ship-y y')))))))
-
-#_(defn- ship-inside? [shape ship-x ship-y ship-h]
-    (every? (hull-point-inside shape ship-x ship-y ship-h) hull-points))
-
-(defn- ship-touches? [shape ship-x ship-y ship-h]
-  (some (hull-point-inside shape ship-x ship-y ship-h) hull-points))
-
-
-(defn handle-cave-collision [state]
-  state)
+        cos-h (cos h)]
+    (dorun (map (fn [[x y] p]
+                  (let [x' (+ (* x cos-h) (* y sin-h))
+                        y' (- (* y cos-h) (* x sin-h))]
+                    (svg/set-point p (+ ship-x x') (+ ship-y y'))))
+                hull-points
+                hull-xys))))
 
 
 (defn set-thruster [state thruster on?]
@@ -111,16 +98,29 @@
     (audio/play-off state thruster 100)))
 
 
+(defn handle-cave-collision [state]
+  (if-not (every? (partial svg/is-xy-in? (-> state :scene :cave))
+                  (-> state :ship :hull-xys))
+    (-> state
+        (assoc :status {:status :game-over
+                        :reason :cave-collision
+                        :ts     (:ts state)})
+        (set-thruster :left false)
+        (set-thruster :right false)
+        (set-thruster :forward false))
+    state))
+
+
 (defn handle-thrusters [state]
   (let [dt            (:dt state)
         ts            (:ts state)
+        ship          (:ship state)
         left          (-> state :control :left)
         right         (-> state :control :right)
         forward       (-> state :control :forward)
         side-delta    (+ (if (:on left) (- side-thruster-delta) 0.0)
                          (if (:on right) side-thruster-delta 0.0))
         forward-delta (if (:on forward) forward-thruster-delta 0.0)
-        ship          (:ship state)
         dh            (u/clamp min-dh (+ (:dh ship) side-delta) max-dh)
         h             (+ (:h ship) (* dt dh))
         new-telemetry (u/vec+ (:vh ship) (:vs ship) h forward-delta)
@@ -128,17 +128,30 @@
         vs            (:v new-telemetry)
         x             (+ (:x ship) (:dx new-telemetry))
         y             (+ (:y ship) (:dy new-telemetry))]
+    (update-hull-xys! (:hull-xys ship) x y h)
     (svg/set-attr (:g ship) :translate [x y])
     (svg/set-attr (:speed ship) :rotate (u/rad->deg vh) :y2 (* -100 vs))
     (svg/set-attr (:hull ship) :rotate (u/rad->deg h))
-    (cond-> (update state :ship assoc :x x :y y :h h :vh vh :vs vs :dh dh)
+    (cond-> (update state :ship assoc
+                    :x x :y y
+                    :h h :vh vh
+                    :vs vs :dh dh)
       (= (:ts left) ts) (set-thruster :left (:on left))
       (= (:ts right) ts) (set-thruster :right (:on right))
       (= (:ts forward) ts) (set-thruster :forward (:on forward)))))
 
 
-(defn tick-ship [state]
-  (-> state
-      (handle-reset)
-      (handle-thrusters)
-      (handle-cave-collision)))
+(defn handle-cannon [state]
+  (let [{:keys [on ts]} (-> state :control :cannon)]
+    (if (and on (= ts (:ts state)))
+      (bullets/shoot state)
+      state)))
+
+
+(defn tick [state]
+  (if (-> state :status :status (= :run))
+    (-> state
+        (handle-thrusters)
+        (handle-cannon)
+        (handle-cave-collision))
+    state))

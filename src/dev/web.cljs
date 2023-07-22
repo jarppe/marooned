@@ -26,6 +26,13 @@
   (sin 0)
   (atan 1 0)
 
+
+
+  (let [x             600
+        ufo-x         800
+        ship-offset-x 200]
+    (- ufo-x ship-offset-x x))
+
   (defn vec+ [h1 v1 h2 v2]
     (let [x (+ (* v1 (sin h1))
                (* v2 (sin h2)))

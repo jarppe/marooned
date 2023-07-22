@@ -129,7 +129,7 @@
 
 (defn- convert-points [args]
   (update args :points (fn [points]
-                         (if (vector? points)
+                         (if (sequential? points)
                            (reduce (fn [s [x y]]
                                      (str s x "," y " "))
                                    ""
