@@ -5,6 +5,7 @@
             [marooned.scene :as scene]
             [marooned.ufo :as ufo]
             [marooned.diamond :as diamond]
+            [marooned.door :as door]
             [marooned.bullets :as bullets]))
 
 
@@ -27,7 +28,8 @@
       (ship/reset)
       (ufo/reset)
       (bullets/reset)
-      (diamond/reset)))
+      (diamond/reset)
+      (door/reset)))
 
 
 (defn handle-reset [state]
@@ -37,12 +39,14 @@
     (reset state)
     state))
 
+
 (defn handle-game-over [state]
   (if (and (-> state :status :status (= :game-over))
            (-> state :status :ts (= (:ts state))))
     (-> state
         (ship/game-over)
-        (ufo/game-over))
+        (ufo/game-over)
+        (door/game-over))
     state))
 
 
@@ -59,6 +63,7 @@
         (assoc :dt dt)
         (handle-reset)
         (bullets/tick)
+        (door/tick)
         (ship/tick)
         (ufo/tick)
         (diamond/tick)
@@ -86,4 +91,5 @@
       (ufo/create)
       (diamond/create)
       (bullets/create)
+      (door/create)
       (reset)))

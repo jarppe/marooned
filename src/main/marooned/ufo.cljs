@@ -90,9 +90,10 @@
 
 
 (defn handle-ufo-shoot [state]
-  (if (> (- (-> state :ts)
-            (-> state :ufo :shoot-ts))
-         ufo-shoot-rate)
+  (if (and (-> state :ship :x (> 4900))
+           (> (- (-> state :ts)
+                 (-> state :ufo :shoot-ts))
+              ufo-shoot-rate))
     (-> state
         (ufo-shoot)
         (update :ufo assoc :shoot-ts (:ts state)))

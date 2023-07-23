@@ -20,7 +20,7 @@
 (defn create [state]
   (let [cave       (svg/path {:stroke       "gray"
                               :stroke-width 2
-                              :fill         "dark-gray"
+                              :fill         "rgb(24, 24, 24)"
                               :d            shapes/cave-path})
         soil       (svg/pattern {:id           "soil-pattern"
                                  :x            0
@@ -28,15 +28,16 @@
                                  :width        100
                                  :height       100
                                  :patternUnits "userSpaceOnUse"}
-                                (svg/path {:fill "dark-gray"
+                                (svg/path {:fill "rgb(73, 73, 73)"
                                            :d    shapes/soil-pattern}))
-        background (svg/rect {:x      -1000
-                              :y      -1000
-                              :width  10000
-                              :height 3000
-                              :fill   "url(#soil-pattern)"})
+        background (svg/g (svg/rect {:x      -1000
+                                     :y      -1000
+                                     :width  10000
+                                     :height 3000
+                                     :fill   "url(#soil-pattern)"}))
         board      (svg/g background
                           cave
+                          (-> state :door :g)
                           (-> state :diamond :g)
                           (-> state :bullets :g)
                           (-> state :ship :hull)
@@ -45,7 +46,7 @@
                           (-> state :ufo :g))
         scene      (svg/g {:id "scene"} board)]
     (-> (u/clear-elem "game")
-        (u/append* [(svg/defs soil)
+        (u/append* [(svg/defs soil (-> state :door :defs))
                     scene]))
     (assoc state :scene {:scene scene
                          :board board

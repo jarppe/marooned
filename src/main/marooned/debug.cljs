@@ -31,6 +31,7 @@
    ["right" [:control :right :on on-off]]
    ["forward" [:control :forward :on on-off]]
    ["cannon" [:control :cannon :on on-off]]
+   ["ufo active" [:ufo :active? on-off]]
    #_["bullets" [:bullets :ship-bullets :b (fn [bullets]
                                              (str/join " " (map (fn [{:keys [^js pt h]}]
                                                                   (str "["

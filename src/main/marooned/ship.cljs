@@ -63,15 +63,34 @@
                         :g        g})))
 
 
+(defn set-thruster [state thruster on?]
+  (svg/set-attr (-> state :ship :thruster thruster) "display" (if on? "on" "none"))
+  (if on?
+    (audio/play-on state thruster)
+    (audio/play-off state thruster 100)))
+
+
+(defn all-thruster-off [state]
+  (reduce (fn [state thruster] (set-thruster state thruster false))
+          state
+          [:left :right :forward]))
+
+
+(defn game-over [state]
+  (all-thruster-off state))
+
+
 (defn reset [state]
-  (update state :ship merge {:x           4500
-                             :y           500
-                             :h           PIp2
-                             :vh          0
-                             :vs          0
-                             :dh          0
-                             :fire-ts     0
-                             :hull-points []}))
+  (-> state
+      (all-thruster-off)
+      (update :ship merge {:x           2800
+                           :y           500
+                           :h           PIp2
+                           :vh          0
+                           :vs          0
+                           :dh          0
+                           :fire-ts     0
+                           :hull-points []})))
 
 
 (defn get-hull-svg-points [x y h]
@@ -85,13 +104,6 @@
              (svg/point (- x x')
                         (+ y y'))))
          hull-points)))
-
-
-(defn set-thruster [state thruster on?]
-  (svg/set-attr (-> state :ship :thruster thruster) "display" (if on? "on" "none"))
-  (if on?
-    (audio/play-on state thruster)
-    (audio/play-off state thruster 100)))
 
 
 (defn handle-thrusters [state]
@@ -160,10 +172,3 @@
         (handle-thrusters)
         (handle-cannon))
     state))
-
-
-(defn game-over [state]
-  (reduce (fn [state sound]
-            (audio/play-off state sound))
-          state
-          [:left :right :forward]))
