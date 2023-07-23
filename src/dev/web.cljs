@@ -27,6 +27,17 @@
   (atan 1 0)
 
 
+  (let [b1 {:a 1}
+        b2 {:a 2}
+        b3 {:a 3}]
+    (sequence (remove #(identical? % b2)) [b1 b2 b3]))
+
+
+  (def tick-timer
+    (let [s (atom [0 0])]
+      (fn [t]
+        (second (swap! s (fn [[c a]]
+                           [(inc c) (/ (+ (* a c) t) (inc c))]))))))
 
   (let [x             600
         ufo-x         800

@@ -18,6 +18,8 @@
                         (str (name status)
                              (when reason
                                (str " (" (name reason) ")"))))]]
+   ["timing" [:timing (fn [[max-t avg-t]] (str "max: " (.toFixed max-t 1) " "
+                                               "avg: " (.toFixed avg-t 1)))]]
    ["dt" [:dt num-fmt]]
    ["x" [:ship :x num-fmt]]
    ["y" [:ship :y num-fmt]]

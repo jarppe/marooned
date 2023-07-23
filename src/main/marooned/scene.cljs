@@ -4,7 +4,7 @@
             [marooned.shapes :as shapes]))
 
 
-(def ship-offset-x 300)
+(def ship-offset-x 500)
 
 
 (defn on-resize [_]
@@ -39,7 +39,9 @@
                           cave
                           (-> state :diamond :g)
                           (-> state :bullets :g)
+                          (-> state :ship :hull)
                           (-> state :ship :g)
+                          (-> state :ship :speed)
                           (-> state :ufo :g))
         scene      (svg/g {:id "scene"} board)]
     (-> (u/clear-elem "game")

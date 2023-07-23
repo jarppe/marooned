@@ -67,6 +67,15 @@
   elem)
 
 
+(defn- convert-points [args]
+  (update args :points (fn [points]
+                         (if (sequential? points)
+
+                           points))))
+
+
+
+
 (defn set-attr [elem & attrs]
   (let [elem (u/get-elem elem)]
     (when (seq attrs)
@@ -76,7 +85,14 @@
                          specials
                          (let [special? (special-attr? attr-name)]
                            (when-not special?
-                             (.setAttribute elem (name attr-name) (str attr-value)))
+                             (if (and (= attr-name :points)
+                                      (sequential? attr-value))
+                               (.setAttribute elem "points" (reduce (if (sequential? (first attr-value))
+                                                                      (fn [s [x y]] (str s x "," y " "))
+                                                                      (fn [s ^js pt] (str s (.-x pt) "," (.-y pt) " ")))
+                                                                    ""
+                                                                    attr-value))
+                               (.setAttribute elem (name attr-name) (str attr-value))))
                            (recur (if special?
                                     (conj specials [attr-name attr-value])
                                     specials)
@@ -127,22 +143,8 @@
 (def line (partial create-element "line"))
 
 
-(defn- convert-points [args]
-  (update args :points (fn [points]
-                         (if (sequential? points)
-                           (reduce (fn [s [x y]]
-                                     (str s x "," y " "))
-                                   ""
-                                   points)
-                           points))))
-
-
-(defn polyline [args & children]
-  (apply create-element "polyline" (convert-points args) children))
-
-
-(defn polygon [args & children]
-  (apply create-element "polygon" (convert-points args) children))
+(def polyline (partial create-element "polyline"))
+(def polygon (partial create-element "polygon"))
 
 
 (def defs (partial create-element "defs"))
