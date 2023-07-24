@@ -6,6 +6,18 @@
             [marooned.blackhole :as blackhole]))
 
 
+; game:        200  500
+; diamond:    2250  500
+; doors:      2950  500
+; blackholes: 3350  500
+; ufo:        4800  500
+
+
+(def start-x 3350)
+(def start-y 500)
+(def start-h PIp2)
+
+
 (def ^:const max-dh (/ PI 1000.0))
 (def ^:const min-dh (- max-dh))
 (def ^:const side-thruster-delta (/ max-dh 80.0))
@@ -84,9 +96,9 @@
 (defn reset [state]
   (-> state
       (all-thruster-off)
-      (update :ship merge {:x           3400
-                           :y           500
-                           :h           PIp2
+      (update :ship merge {:x           start-x
+                           :y           start-y
+                           :h           start-h
                            :vh          0
                            :vs          0
                            :dh          0

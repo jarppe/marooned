@@ -1,5 +1,7 @@
 (ns marooned.blackhole
-  (:require [marooned.svg :as svg]))
+  (:require [marooned.svg :as svg]
+            [marooned.audio :as audio]
+            [marooned.util :as u]))
 
 
 (def blackhole1 {:x 3700
@@ -27,3 +29,23 @@
                                                                  :stop-opacity 0}))
                            :g    (svg/g (make-blackhole blackhole1)
                                         (make-blackhole blackhole2))}))
+
+
+(defn hit? [state]
+  (let [ship (-> state :ship)
+        x    (:x ship)
+        y    (:y ship)]
+    (or (< (u/pt-dist x y blackhole1) 40)
+        (< (u/pt-dist x y blackhole2) 40))))
+
+
+
+(defn tick [state]
+  (if (and (-> state :status :status (= :run))
+           (hit? state))
+    (-> state
+        (audio/play :ufo-explosion)
+        (assoc :status {:status :game-over
+                        :reason :blackhole-collision
+                        :ts     (:ts state)}))
+    state))

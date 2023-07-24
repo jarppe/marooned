@@ -68,6 +68,7 @@
         (ship/tick)
         (ufo/tick)
         (diamond/tick)
+        (blackhole/tick)
         (scene/tick)
         (handle-game-over)
         (tick-timer (- (now) loop-start))

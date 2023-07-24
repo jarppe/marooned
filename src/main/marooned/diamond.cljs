@@ -48,7 +48,7 @@
 
 (defn capture? [state]
   (some (partial svg/is-xy-in? (-> state :diamond :body))
-        (-> state :ship :hull-xys)))
+        (-> state :ship :hull-points)))
 
 
 (defn tick [state]
