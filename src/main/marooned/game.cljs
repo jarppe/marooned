@@ -6,7 +6,8 @@
             [marooned.ufo :as ufo]
             [marooned.diamond :as diamond]
             [marooned.door :as door]
-            [marooned.bullets :as bullets]))
+            [marooned.bullets :as bullets]
+            [marooned.blackhole :as blackhole]))
 
 
 (defn tick-timer [state t]
@@ -92,4 +93,6 @@
       (diamond/create)
       (bullets/create)
       (door/create)
+      (blackhole/create)
+      (scene/create)
       (reset)))

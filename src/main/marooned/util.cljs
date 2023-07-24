@@ -58,13 +58,23 @@
       value)))
 
 
-(defn vec+ [h1 v1 h2 v2]
-  (let [x (+ (* v1 (sin h1))
-             (* v2 (sin h2)))
-        y (+ (* v1 (cos h1))
-             (* v2 (cos h2)))]
+(defn pt-h [x0 y0 {:keys [x y]}]
+  (atan (- x x0) (- y0 y)))
+
+
+(defn pt-dist [x0 y0 {:keys [x y]}]
+  (let [x (- x x0)
+        y (- y y0)]
+    (sqrt (+ (* x x) (* y y)))))
+
+
+(defn vec+ [{:keys [h s]} dh ds]
+  (let [x (+ (* s (sin h))
+             (* ds (sin dh)))
+        y (+ (* s (cos h))
+             (* ds (cos dh)))]
     {:h  (atan x y)
-     :v  (sqrt (+ (* x x) (* y y)))
+     :s  (sqrt (+ (* x x) (* y y)))
      :dx x
      :dy (- y)}))
 

@@ -39,6 +39,7 @@
                           cave
                           (-> state :door :g)
                           (-> state :diamond :g)
+                          (-> state :blackhole :g)
                           (-> state :bullets :g)
                           (-> state :ship :hull)
                           (-> state :ship :g)
@@ -46,7 +47,7 @@
                           (-> state :ufo :g))
         scene      (svg/g {:id "scene"} board)]
     (-> (u/clear-elem "game")
-        (u/append* [(svg/defs soil (-> state :door :defs))
+        (u/append* [(svg/defs soil (-> state :door :defs) (-> state :blackhole :defs))
                     scene]))
     (assoc state :scene {:scene scene
                          :board board
@@ -67,4 +68,4 @@
 (defn init [state]
   (u/add-event-listener js/window :resize on-resize)
   (js/setTimeout on-resize 0)
-  (create state))
+  state)

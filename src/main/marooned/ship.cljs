@@ -2,7 +2,8 @@
   (:require [marooned.util :as u :refer [PI PIp2 sin cos]]
             [marooned.svg :as svg]
             [marooned.audio :as audio]
-            [marooned.bullets :as bullets]))
+            [marooned.bullets :as bullets]
+            [marooned.blackhole :as blackhole]))
 
 
 (def ^:const max-dh (/ PI 1000.0))
@@ -83,7 +84,7 @@
 (defn reset [state]
   (-> state
       (all-thruster-off)
-      (update :ship merge {:x           2800
+      (update :ship merge {:x           3400
                            :y           500
                            :h           PIp2
                            :vh          0
@@ -106,6 +107,11 @@
          hull-points)))
 
 
+(def max-blackhole-force (* forward-thruster-delta 1.5))
+(def blackhole-force (comp (u/bound 0.0 max-blackhole-force)
+                           (u/scaler [30 400] [max-blackhole-force 0])))
+
+
 (defn handle-thrusters [state]
   (let [dt            (:dt state)
         ts            (:ts state)
@@ -118,9 +124,15 @@
         forward-delta (if (:on forward) forward-thruster-delta 0.0)
         dh            (u/clamp min-dh (+ (:dh ship) side-delta) max-dh)
         h             (+ (:h ship) (* dt dh))
-        new-telemetry (u/vec+ (:vh ship) (:vs ship) h forward-delta)
+        x             (:x ship)
+        y             (:y ship)
+        new-telemetry (-> {:h (:vh ship)
+                           :s (:vs ship)}
+                          (u/vec+ h forward-delta)
+                          (u/vec+ (u/pt-h x y blackhole/blackhole1) (blackhole-force (u/pt-dist x y blackhole/blackhole1)))
+                          (u/vec+ (u/pt-h x y blackhole/blackhole2) (blackhole-force (u/pt-dist x y blackhole/blackhole2))))
         vh            (:h new-telemetry)
-        vs            (:v new-telemetry)
+        vs            (:s new-telemetry)
         x             (+ (:x ship) (:dx new-telemetry))
         y             (+ (:y ship) (:dy new-telemetry))
         hull-points   (get-hull-svg-points x y h)]

@@ -1,4 +1,4 @@
-(ns marooned.worker.cache
+(ns marooned.worker-cache
   (:require [marooned.util :refer [js-get js-get-in]]))
 
 

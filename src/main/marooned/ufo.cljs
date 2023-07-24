@@ -58,6 +58,7 @@
     (do   (svg/set-attr (-> state :ufo :hull) :fill hull-fill-collosion)
           (svg/set-attr (-> state :ufo :cockpit) :fill cockpit-fill-collision)
           (-> state
+              (audio/play :ufo-explosion)
               (assoc :status {:status :game-over
                               :reason :ufo-collision
                               :ts     (:ts state)})))
@@ -84,9 +85,11 @@
                         (fn [^js pt]
                           (svg/is-xy-in? ship-hull pt))
                         (fn [state]
-                          (assoc state :status {:status :game-over
-                                                :reason :ufo-bullet
-                                                :ts     (:ts state)})))))
+                          (-> state
+                              (audio/play :ufo-explosion)
+                              (assoc :status {:status :game-over
+                                              :reason :ufo-bullet
+                                              :ts     (:ts state)}))))))
 
 
 (defn handle-ufo-shoot [state]

@@ -1,5 +1,5 @@
 (ns marooned.worker
-  (:require [marooned.worker.cache :as cache]
+  (:require [marooned.worker-cache :as cache]
             [marooned.audio :as audio]))
 
 
