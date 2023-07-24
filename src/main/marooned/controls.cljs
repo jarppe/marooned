@@ -1,6 +1,18 @@
 (ns marooned.controls
-  (:require [marooned.state :refer [app-state]]
+  (:require [clojure.string :as str]
+            [marooned.state :refer [app-state]]
             [marooned.util :as u]))
+
+
+(def key-code->control (cond-> {"ArrowUp"    :forward
+                                "ArrowLeft"  :left
+                                "ArrowRight" :right
+                                "Space"      :cannon
+                                "Enter"      :continue
+                                "KeyS"       :toggle-sound}
+                         (str/starts-with? js/window.location.host "localhost")
+                         (assoc "KeyD" :debug
+                                "KeyR" :reset)))
 
 
 (defn on-key [down?]
@@ -8,14 +20,7 @@
     (when-not (or (.-repeat e)
                   (.-ctrlKey e)
                   (.-metaKey e))
-      (when-let [control (case (.-code e)
-                           "ArrowUp" :forward
-                           "ArrowLeft" :left
-                           "ArrowRight" :right
-                           "Space" :cannon
-                           "KeyD" :debug
-                           "KeyR" :reset
-                           nil)]
+      (when-let [control (key-code->control (.-code e))]
         (.preventDefault e)
         (swap! app-state (fn [state] (update state :control update control assoc :on down? :ts (:ts state))))))
     nil))

@@ -13,9 +13,16 @@
 ; ufo:        4800  500
 
 
-(def start-x 3350)
+(def start-x 200)
 (def start-y 500)
 (def start-h PIp2)
+
+
+(def continue-points [[6900  [6800 875]]
+                      [5100  [4800 525]]
+                      [3600  [3400 475]]
+                      [2000  [1700 775]]
+                      [-1000 [200  500]]])
 
 
 (def ^:const max-dh (/ PI 1000.0))
@@ -57,7 +64,7 @@
         forward-thruster-cone (make-thruster-cone 0 20 0)
         hull                  (svg/polygon {:stroke       "red"
                                             :stroke-width 3
-                                            :fill         "var(--text-color)"
+                                            :fill         "rgb(24, 24, 24)"
                                             :points       hull-points})
         speed                 (svg/line {:stroke       "green"
                                          :stroke-width 2
@@ -73,7 +80,10 @@
                                    :forward forward-thruster-cone}
                         :hull     hull
                         :speed    speed
-                        :g        g})))
+                        :g        g
+                        :x        start-x
+                        :y        start-y
+                        :h        start-h})))
 
 
 (defn set-thruster [state thruster on?]
@@ -94,16 +104,20 @@
 
 
 (defn reset [state]
-  (-> state
-      (all-thruster-off)
-      (update :ship merge {:x           start-x
-                           :y           start-y
-                           :h           start-h
-                           :vh          0
-                           :vs          0
-                           :dh          0
-                           :fire-ts     0
-                           :hull-points []})))
+  (let [x     (-> state :ship :x)
+        [x y] (some (fn [[limit pos]]
+                      (when (> x limit)
+                        pos))
+                    continue-points)]
+    (-> state
+        (all-thruster-off)
+        (update :ship merge {:x           x
+                             :y           y
+                             :vh          0
+                             :vs          0
+                             :dh          0
+                             :fire-ts     0
+                             :hull-points []}))))
 
 
 (defn get-hull-svg-points [x y h]
@@ -153,9 +167,7 @@
     (svg/set-attr (:hull ship) :points hull-points)
     (if-not (every? (partial svg/is-xy-in? (-> state :scene :cave)) hull-points)
       (-> state
-          (assoc :status {:status :game-over
-                          :reason :cave-collision
-                          :ts     (:ts state)})
+          (u/game-over :cave-collision)
           (set-thruster :left false)
           (set-thruster :right false)
           (set-thruster :forward false))

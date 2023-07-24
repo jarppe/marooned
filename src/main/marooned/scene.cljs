@@ -35,6 +35,9 @@
                                      :width  10000
                                      :height 3000
                                      :fill   "url(#soil-pattern)"}))
+        dialogs    (svg/g {:stroke       "red"
+                           :stroke-width 4
+                           :fill         "rgb(24, 24, 24)"})
         board      (svg/g background
                           cave
                           (-> state :door :g)
@@ -45,20 +48,17 @@
                           (-> state :ship :g)
                           (-> state :ship :speed)
                           (-> state :ufo :g))
-        scene      (svg/g {:id "scene"} board)]
+        scene      (svg/g {:id "scene"} board dialogs)]
     (-> (u/clear-elem "game")
         (u/append* [(svg/defs soil (-> state :door :defs) (-> state :blackhole :defs))
                     scene]))
-    (assoc state :scene {:scene scene
-                         :board board
-                         :cave  cave})))
+    (assoc state :scene {:scene   scene
+                         :board   board
+                         :cave    cave
+                         :dialogs dialogs})))
 
 
 (defn tick [state]
-  (when (-> state :status :ts (= (:ts state)))
-    (svg/set-attr (-> state :scene :cave)
-                  :stroke
-                  (-> state :status :reason (= :cave-collision) (if "red" "gray"))))
   (svg/set-attr (-> state :scene :board)
                 :translate
                 [(->> state :ship :x (min 5800) (- ship-offset-x)) 0])

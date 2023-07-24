@@ -7,7 +7,9 @@
             [marooned.diamond :as diamond]
             [marooned.door :as door]
             [marooned.bullets :as bullets]
-            [marooned.blackhole :as blackhole]))
+            [marooned.blackhole :as blackhole]
+            [marooned.audio :as audio]
+            [marooned.dialog :as dialog]))
 
 
 (defn tick-timer [state t]
@@ -18,14 +20,15 @@
 
 
 (defn now []
-  (.now (.-performance js/window)))
+  (js/window.performance.now))
 
 
 (defn reset [state]
   (-> state
       (assoc :status {:status :run
                       :ts     (:ts state)
-                      :timing [0 0 0]})
+                      :timing [0 0 0]
+                      :lives  3})
       (ship/reset)
       (ufo/reset)
       (bullets/reset)
@@ -44,10 +47,19 @@
 (defn handle-game-over [state]
   (if (and (-> state :status :status (= :game-over))
            (-> state :status :ts (= (:ts state))))
-    (-> state
-        (ship/game-over)
-        (ufo/game-over)
-        (door/game-over))
+    (do (dialog/show-dialog (-> state :scene :dialogs) :crash {})
+        (-> state
+            (ship/game-over)
+            (ufo/game-over)))
+    state))
+
+
+(defn handle-continue [state]
+  (if (and (-> state :status :status (= :game-over))
+           (-> state :control :continue :on)
+           (-> state :control :continue :ts (= (:ts state))))
+    (do (dialog/close-dialog (-> state :scene :dialogs))
+        (reset state))
     state))
 
 
@@ -70,7 +82,9 @@
         (diamond/tick)
         (blackhole/tick)
         (scene/tick)
+        (audio/tick)
         (handle-game-over)
+        (handle-continue)
         (tick-timer (- (now) loop-start))
         (debug/tick-debug)
         (assoc :ts new-ts))))

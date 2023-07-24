@@ -182,5 +182,11 @@
   ([elem event handler] (add-event-listener elem event handler nil))
   ([elem event handler opts]
    (let [elem (get-elem elem)]
-     (.addEventListener elem (name event) handler opts)
+     (.addEventListener elem (name event) handler (clj->js opts))
      elem)))
+
+
+(defn game-over [state reason]
+  (update state :status merge {:status :game-over
+                               :reason reason
+                               :ts     (:ts state)}))

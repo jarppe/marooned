@@ -45,7 +45,5 @@
            (hit? state))
     (-> state
         (audio/play :ufo-explosion)
-        (assoc :status {:status :game-over
-                        :reason :blackhole-collision
-                        :ts     (:ts state)}))
+        (u/game-over :blackhole-collision))
     state))

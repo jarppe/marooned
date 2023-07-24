@@ -59,9 +59,7 @@
           (svg/set-attr (-> state :ufo :cockpit) :fill cockpit-fill-collision)
           (-> state
               (audio/play :ufo-explosion)
-              (assoc :status {:status :game-over
-                              :reason :ufo-collision
-                              :ts     (:ts state)})))
+              (u/game-over :ufo-collision)))
     state))
 
 
@@ -87,9 +85,7 @@
                         (fn [state]
                           (-> state
                               (audio/play :ufo-explosion)
-                              (assoc :status {:status :game-over
-                                              :reason :ufo-bullet
-                                              :ts     (:ts state)}))))))
+                              (u/game-over :ufo-bullet))))))
 
 
 (defn handle-ufo-shoot [state]

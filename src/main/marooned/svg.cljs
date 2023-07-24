@@ -110,7 +110,7 @@
 (defn append* [elem children]
   (let [elem (u/get-elem elem)]
     (doseq [c children]
-      (.appendChild elem c))
+      (.append elem c))
     elem))
 
 
@@ -141,6 +141,13 @@
 (def rect (partial create-element "rect"))
 (def path (partial create-element "path"))
 (def line (partial create-element "line"))
+
+
+(defn text [attrs & texts]
+  (let [elem (js/document.createElementNS xmlns "text")]
+    (doseq [[k v] attrs]
+      (.setAttribute elem (name k) (str v)))
+    (append* elem texts)))
 
 
 (def polyline (partial create-element "polyline"))
@@ -208,4 +215,3 @@
    (.isPointInFill elem pt))
   ([^js elem x y]
    (.isPointInFill elem (point x y))))
-

@@ -1,5 +1,6 @@
 (ns marooned.door
-  (:require [marooned.svg :as svg]))
+  (:require [marooned.svg :as svg]
+            [marooned.util :as u]))
 
 
 (def ^:const door-height 150)
@@ -56,9 +57,7 @@
 (defn handle-door-collision [state hull-points door]
   (if (some (partial svg/is-xy-in? (:g door)) hull-points)
     (do (svg/set-attr (:g door) :fill door-fill-collision)
-        (assoc state :status {:status :game-over
-                              :reason :door-collision
-                              :ts     (:ts state)}))
+        (u/game-over state :door-collision))
     state))
 
 
@@ -75,8 +74,3 @@
               state
               (range (count door-x))))
     state))
-
-
-(defn game-over [state]
-  state)
-

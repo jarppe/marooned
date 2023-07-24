@@ -49,8 +49,6 @@
      (-play sound opts)
      state)))
 
-(defn ue [] (-play (get-sound :ufo-explosion) nil))
-
 
 (defn play-on
   ([state sound-name] (play-on state sound-name nil))
@@ -78,17 +76,33 @@
        state))))
 
 
-(defn- set-sound-on! [on?]
-  (js/console.log "set-sound-on" on?)
+(defn set-sound-on! [on?]
   (if on?
     (u/add-class "sound" "active")
     (u/remove-class "sound" "active"))
-  (.mute Howler (not on?)))
+  (.mute Howler (not on?))
+  (swap! state/app-state assoc :sound-on? on?))
+
+
+(defn toggle-sound-on! []
+  (swap! state/app-state update :sound-on? (fn [was-on?]
+                                             (let [on? (not was-on?)]
+                                               (js/console.log "TOGGLE" on?)
+                                               (if on?
+                                                 (u/add-class "sound" "active")
+                                                 (u/remove-class "sound" "active"))
+                                               (.mute Howler (not on?))
+                                               on?))))
 
 
 (defn init [state]
-  (u/add-event-listener "sound" :click (fn [_] (swap! state/app-state update :sound-on? (fn [sound-was-on?]
-                                                                                          (let [sound-on? (not sound-was-on?)]
-                                                                                            (set-sound-on! sound-on?)
-                                                                                            sound-on?)))))
-  (assoc state :sound-on? true))
+  (u/add-event-listener "sound" :click (fn [_] (toggle-sound-on!)))
+  (set-sound-on! true)
+  state)
+
+
+(defn tick [state]
+  (let [{:keys [on ts]} (-> state :control :toggle-sound)]
+    (when (and on (= ts (:ts state)))
+      (js/setTimeout toggle-sound-on! 0)))
+  state)

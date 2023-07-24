@@ -1,8 +1,8 @@
 :root {
-  --text-color:       rgb(60, 60, 60);
+  --text-color:       rgb(143, 143, 143);
   --background-color: hsl(0 0% 10%);
   --hover-color:      rgb(100, 100, 100);
-  --active-color:     rgb(23, 87, 23);
+  --active-color:     rgb(39, 141, 39);
 }
 
 
@@ -23,8 +23,8 @@ a {
   display: flex;
   fill: var(--text-color);
   
-  & :hover  { fill: var(--hover-color); }
-  & .active { fill: var(--active-color); }  
+  &:hover path { fill: var(--hover-color); }
+  &.active path { fill: var(--active-color); }  
 
   & svg {
     width: 2rem;
@@ -127,4 +127,10 @@ h1 {
   & table td:nth-child(2) {
     text-align: right;
   }
+}
+
+.dialog text {
+  font: 30px sans-serif;
+  letter-spacing: 3px;
+  fill: red;
 }

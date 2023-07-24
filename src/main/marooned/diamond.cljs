@@ -47,15 +47,16 @@
 
 
 (defn capture? [state]
-  (some (partial svg/is-xy-in? (-> state :diamond :body))
-        (-> state :ship :hull-points)))
+  (and (-> state :diamond :captured? not)
+       (some (partial svg/is-xy-in? (-> state :diamond :body)) (-> state :ship :hull-points))))
 
 
 (defn tick [state]
   (if (capture? state)
     (do (svg/set-attr (-> state :diamond :body) :fill "rgb(90, 90, 38)")
         (svg/set-attr (-> state :diamond :g) :stroke "rgb(169, 169, 97)")
-        (update state :diamond assoc :captured? false))
-    state)
-  state)
+        (-> state
+            (update :diamond assoc :captured? true)
+            (update :status update :lives + 3)))
+    state))
 
