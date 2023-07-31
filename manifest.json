@@ -2,6 +2,7 @@
   "name": "Marooned",
   "display": "fullscreen",
   "start_url": "./index.html",
+  "orientation": "landscape",
   "icons": [
     {
       "src": "icon/marooned.512.png",
