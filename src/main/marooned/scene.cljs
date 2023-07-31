@@ -13,6 +13,7 @@
         height  (.-clientHeight wrapper)
         scale   (min (/ width 2000.0)
                      (/ height 1000.0))]
+    (js/console.log "on-resize:" width "x" height)
     (svg/set-attr "game" :viewBox (str "0 0 " width " " height))
     (svg/set-attr "scene" :scale scale :translate [0 (/ (- height (* scale 1000.0)) 2.0)])))
 
@@ -65,7 +66,22 @@
   state)
 
 
+(defn on-screen-orientation-change [^js e]
+  (let [orientation-type  (-> e .-target .-type)
+        orientation-angle (-> e .-target .-angle)]
+    (js/console.log "on-screen-orientation-change: type =" orientation-type ", angle =" orientation-angle)))
+
+
+#_(defn on-device-orientation-change [^js e]
+    (let [alpha (.-alpha e)
+          beta  (.-beta e)
+          gamma (.-gamma e)]
+      (js/console.log "on-device-orientation-change:" "alpha" alpha "beta" beta "gamma" gamma)))
+
+
 (defn init [state]
   (u/add-event-listener js/window :resize on-resize)
+  ;(u/add-event-listener js/window :deviceorientation on-device-orientation-change)
+  (u/add-event-listener js/screen.orientation :change on-screen-orientation-change)
   (js/setTimeout on-resize 0)
   state)

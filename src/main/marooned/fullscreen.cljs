@@ -24,6 +24,10 @@
       (u/set-attr "fullscreen" :style "display: none;"))
     (when can-fullscreen?
       (u/add-event-listener "fullscreen" :click (fn [_] (swap! state/app-state update :is-fullscreen? toggle-fullscreen))))
+    (when is-fullscreen?
+      (-> (js/screen.orientation.lock "landscape")
+          (.then (fn [_] (js/console.log "screen orientation: locked"))
+                 (fn [error] (js/console.log "screen orientation: error" error)))))
     (assoc state
            :can-fullscreen? can-fullscreen?
            :is-fullscreen?  is-fullscreen?)))
