@@ -32,7 +32,7 @@ a {
     padding: 1rem;
   }
 
-  & .large svg {
+  &.large svg {
     width: 4rem;
     height: 4rem;
     padding: 2rem;
@@ -46,6 +46,7 @@ a {
 body {
   font-family: system-ui;
   background-color: var(--background-color);
+  user-select: none;
 }
 
 
