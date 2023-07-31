@@ -9,7 +9,6 @@
 html, body, div, main, svg, h1, a, i {
   margin: 0;
   padding: 0;
-  user-select: none;
 }
 
 
@@ -47,6 +46,7 @@ body {
   font-family: system-ui;
   background-color: var(--background-color);
   user-select: none;
+  -webkit-user-select: none;
 }
 
 
