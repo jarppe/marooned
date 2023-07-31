@@ -35,7 +35,7 @@ a {
   &.large svg {
     width: 4rem;
     height: 4rem;
-    padding: 2rem;
+    padding: 1rem;
   }
 }
 
@@ -96,7 +96,6 @@ h1 {
   left: 0;
   display: flex;
   flex-flow: row nowrap;
-  padding-left: 2rem;
 }
 
 
@@ -106,7 +105,6 @@ h1 {
   right: 0;
   display: flex;
   flex-flow: row nowrap;
-  padding-right: 2rem;
 }
 
 
