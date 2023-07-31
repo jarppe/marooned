@@ -1,18 +1,25 @@
 (ns marooned.controls
   (:require [clojure.string :as str]
             [marooned.state :refer [app-state]]
+            [marooned.audio :as audio]
+            [marooned.debug :as debug]
             [marooned.util :as u]))
 
 
-(def key-code->control (cond-> {"ArrowUp"    :forward
-                                "ArrowLeft"  :left
-                                "ArrowRight" :right
-                                "Space"      :cannon
-                                "Enter"      :continue
-                                "KeyS"       :toggle-sound}
-                         (str/starts-with? js/window.location.host "localhost")
-                         (assoc "KeyD" :debug
-                                "KeyR" :reset)))
+(defn control-handler [control]
+  (fn [down?]
+    (swap! app-state (fn [state] (update state :control update control assoc :on down? :ts (:ts state))))))
+
+
+(def key-code->control-handler (cond-> {"ArrowUp"    (control-handler :forward)
+                                        "ArrowLeft"  (control-handler :left)
+                                        "ArrowRight" (control-handler :right)
+                                        "Space"      (control-handler :cannon)
+                                        "Enter"      (control-handler :continue)
+                                        "KeyS"       (fn [down?] (when down? (audio/toggle-sound-on!)))}
+                                 (str/starts-with? js/window.location.host "localhost")
+                                 (assoc "KeyD" (fn [down?] (when down? (debug/toggle-debug!)))
+                                        "KeyR" (control-handler :reset))))
 
 
 (defn on-key [down?]
@@ -20,9 +27,9 @@
     (when-not (or (.-repeat e)
                   (.-ctrlKey e)
                   (.-metaKey e))
-      (when-let [control (key-code->control (.-code e))]
+      (when-let [handler (key-code->control-handler (.-code e))]
         (.preventDefault e)
-        (swap! app-state (fn [state] (update state :control update control assoc :on down? :ts (:ts state))))))
+        (handler down?)))
     nil))
 
 
@@ -50,4 +57,5 @@
   (add-listeners-for :right)
   (add-listeners-for :forward)
   (add-listeners-for :cannon)
+  (u/add-event-listener "sound" :click (fn [_] (audio/toggle-sound-on!)))
   state)

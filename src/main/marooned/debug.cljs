@@ -1,6 +1,6 @@
 (ns marooned.debug
   (:require [marooned.util :as util]
-            [clojure.string :as str]))
+            [marooned.state :as state]))
 
 
 (defn- num-fmt [^js v]
@@ -32,16 +32,7 @@
    ["forward" [:control :forward :on on-off]]
    ["cannon" [:control :cannon :on on-off]]
    ["ufo active" [:ufo :active? on-off]]
-   ["lives" [:status :lives]]
-   #_["bullets" [:bullets :ship-bullets :b (fn [bullets]
-                                             (str/join " " (map (fn [{:keys [^js pt h]}]
-                                                                  (str "["
-                                                                       (.toFixed (.-x pt) 1)
-                                                                       ", "
-                                                                       (.toFixed (.-y pt) 1)
-                                                                       "] - "
-                                                                       (.toFixed h 1)))
-                                                                bullets)))]]])
+   ["lives" [:status :lives]]])
 
 
 (defn- insert-debug-panel []
@@ -64,21 +55,22 @@
   (util/remove-child "wrapper" "debug"))
 
 
+(defn toggle-debug! []
+  (swap! state/app-state update :debug-on? (fn [was-on?]
+                                             (if was-on?
+                                               (do (remove-debug-panel)
+                                                   false)
+                                               (do (insert-debug-panel)
+                                                   true)))))
+
+
 (defn tick-debug [state]
-  (when (:show-debug? state)
+  (when (:debug-on? state)
     (doseq [[k path] debug-items]
       (when-let [elem (util/get-elem (str "debug-data-" k))]
         (util/set-text elem (reduce (fn [v f] (f v)) state path)))))
-  (let [debug (-> state :control :debug)]
-    (if (and (= (:ts debug) (:ts state))
-             (:on debug))
-      (if (:show-debug? state)
-        (do (remove-debug-panel)
-            (assoc state :show-debug? false))
-        (do (insert-debug-panel)
-            (assoc state :show-debug? true)))
-      state)))
+  state)
 
 
 (defn init [state]
-  state)
+  (assoc state :debug-on? false))

@@ -3,15 +3,14 @@
                  :output-dir       "public"
                  :asset-path       "."
                  :modules          {:shared {:entries []}
-                                    :worker {:web-worker true
+                                    :app    {:entries    [marooned.app]
+                                             :depends-on #{:shared}}
+                                    :worker {:init-fn    marooned.worker/init
                                              :depends-on #{:shared}
-                                             :init-fn    marooned.worker/init}
-                                    :app    {:depends-on #{:shared}
-                                             :entries    [marooned.app]}}
-                 :compiler-options {:output-feature-set :es8}
-                 :devtools         {:after-load marooned.app/run
-                                    :http-root  "public"
-                                    :http-port  8900}}
+                                             :web-worker true}}
+                 :devtools         {:http-root "public"
+                                    :http-port 8900}
+                 :compiler-options {:output-feature-set :es8}}
           :test {:target     :node-test
                  :output-to  "target/test/index.js"
                  :output-dir "target/test/js"

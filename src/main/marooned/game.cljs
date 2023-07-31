@@ -82,7 +82,6 @@
         (diamond/tick)
         (blackhole/tick)
         (scene/tick)
-        (audio/tick)
         (handle-game-over)
         (handle-continue)
         (tick-timer (- (now) loop-start))

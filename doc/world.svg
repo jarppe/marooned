@@ -25,15 +25,15 @@
      inkscape:document-units="px"
      showgrid="true"
      showborder="true"
-     inkscape:zoom="0.52257469"
-     inkscape:cx="2509.6891"
-     inkscape:cy="1296.4654"
-     inkscape:window-width="3840"
-     inkscape:window-height="2107"
+     inkscape:zoom="1.3395665"
+     inkscape:cx="3077.8614"
+     inkscape:cy="668.49985"
+     inkscape:window-width="1800"
+     inkscape:window-height="1097"
      inkscape:window-x="0"
-     inkscape:window-y="25"
+     inkscape:window-y="44"
      inkscape:window-maximized="0"
-     inkscape:current-layer="layer3">
+     inkscape:current-layer="layer2">
     <inkscape:grid
        type="xygrid"
        id="grid113"
@@ -50,8 +50,8 @@
      inkscape:label="Layer 3">
     <path
        id="wall"
-       style="fill:#4dac00;fill-opacity:1;stroke-width:4.06275"
-       d="m 2025,850 100,100 h 450 l 300,-300 h 500 l 150,250 h 800 l 150,-250 h 450 l 150,300 H 7125 V 152 l -650,-2 v 550 l 50,50 h 350 L 6975,650 V 400 l -50,-50 h -200 l -50,50 v 200 h -50 V 350 l 50,-50 h 300 l 50,50 V 700 L 6925,800 H 6225 L 6075,650 V 100 H 5075 L 4925,400 H 4475 L 4335,150 H 3525 L 3375,300 H 2625 V 650 L 2475,800 H 2175 V 600 h 300 V 350 H 2175 L 2025,450 V 700 H 1325 L 775,500 1325,300 h 700 V 150 H 775 L 275,350 h -500 v 300 h 500 l 500,200"
+       style="fill:#4dac00;fill-opacity:0.24234;stroke-width:4.06275"
+       d="m 2250,850 100,100 h 450 l 300,-300 h 500 l 150,250 h 800 l 150,-250 h 450 l 150,300 H 7350 V 152 l -650,-2 v 550 l 50,50 h 350 L 7200,650 V 400 l -50,-50 h -200 l -50,50 v 200 h -50 V 350 l 50,-50 h 300 l 50,50 V 700 L 7150,800 H 6450 L 6300,650 V 100 H 5300 L 5150,400 H 4700 L 4560,150 H 3750 L 3600,300 H 2850 V 650 L 2700,800 H 2400 V 600 h 300 V 350 H 2400 L 2250,450 V 700 H 1550 L 1000,500 1550,300 h 700 V 150 H 1000 L 500,350 H 0 v 300 h 500 l 500,200"
        sodipodi:nodetypes="ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
        inkscape:label="wall" />
   </g>
@@ -61,26 +61,19 @@
      inkscape:label="Layer 2"
      style="display:inline">
     <ellipse
-       style="fill:#030063;fill-opacity:1;stroke-width:0.755652"
+       style="fill:#030063;fill-opacity:1;stroke-width:0.679358"
        id="path3564"
-       cx="6028.7803"
-       cy="443.84"
-       rx="40.458538"
-       ry="15.36" />
-    <ellipse
-       style="fill:#030063;fill-opacity:1;stroke-width:0.755652"
-       id="path2618"
-       cx="3362.1951"
-       cy="440"
-       rx="18.390244"
-       ry="19.200001" />
+       cx="5700"
+       cy="410"
+       rx="50.229271"
+       ry="10.000004" />
     <rect
        style="fill:#ac005e;fill-opacity:1;stroke-width:0.756002"
        id="rect2512"
        width="37.598965"
        height="37.598965"
-       x="2211.03"
-       y="-1639.3556"
+       x="2186.3022"
+       y="-1568.1338"
        transform="matrix(0.69171406,0.72217149,-0.69171406,0.72217149,0,0)" />
     <rect
        style="fill:#ac005e;fill-opacity:1;stroke-width:0.756002"
@@ -91,11 +84,30 @@
        y="-4856.3198"
        transform="matrix(0.69171406,0.72217149,-0.69171406,0.72217149,0,0)" />
     <rect
-       style="fill:#030063;fill-opacity:1;stroke-width:0.699599"
+       style="fill:#030063;fill-opacity:1;stroke-width:0.658156"
        id="rect3717"
-       width="36.780487"
-       height="230.39999"
-       x="4263.3169"
-       y="113.6" />
+       width="49.999958"
+       height="150"
+       x="3100"
+       y="300" />
+    <circle
+       style="fill:#4dac00;fill-opacity:0.24234;stroke-width:3.35116"
+       id="path4056"
+       cx="3920"
+       cy="590"
+       r="250" />
+    <ellipse
+       style="fill:#08005f;fill-opacity:1;stroke-width:1.10131"
+       id="path4116"
+       cx="5700"
+       cy="405"
+       rx="30"
+       ry="15" />
+    <circle
+       style="fill:#4dac00;fill-opacity:0.24234;stroke-width:3.35116"
+       id="circle4850"
+       cx="4370"
+       cy="440"
+       r="250" />
   </g>
 </svg>
